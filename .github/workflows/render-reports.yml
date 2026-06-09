@@ -104,28 +104,33 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download all render artifacts
+      - name: Resolve report ID from release tag
+        id: tag
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          echo "report_id=${TAG%%-v*}" >> "$GITHUB_OUTPUT"
+
+      - name: Download HTML artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: SF-TR-*
-          merge-multiple: true
-          path: dist
+          name: ${{ steps.tag.outputs.report_id }}-html
+          path: dist/html
+
+      - name: Download PDF artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.tag.outputs.report_id }}-pdf
+          path: dist/pdf
+        continue-on-error: true
 
       - name: Prepare release assets
         run: |
           mkdir -p release-assets
-          for dir in dist/*-html/; do
-            [ -d "$dir" ] || continue
-            report_id=$(basename "$dir" -html)
-            cp "${dir}paper.html" "release-assets/${report_id}.html"
-          done
-          for dir in dist/*-pdf/; do
-            [ -d "$dir" ] || continue
-            report_id=$(basename "$dir" -pdf)
-            if [ -f "${dir}paper.pdf" ]; then
-              cp "${dir}paper.pdf" "release-assets/${report_id}.pdf"
-            fi
-          done
+          REPORT="${{ steps.tag.outputs.report_id }}"
+          cp "dist/html/paper.html" "release-assets/${REPORT}.html"
+          if [ -f "dist/pdf/paper.pdf" ]; then
+            cp "dist/pdf/paper.pdf" "release-assets/${REPORT}.pdf"
+          fi
           ls -la release-assets/
 
       - name: Upload to GitHub Release
