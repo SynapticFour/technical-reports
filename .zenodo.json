@@ -1,0 +1,27 @@
+{
+  "title": "Synaptic Four Technical Report Series",
+  "upload_type": "publication",
+  "publication_type": "report",
+  "description": "Version-controlled technical reports from Synaptic Four covering bioinformatics, GA4GH standards, FAIR data systems, and research infrastructure. Each GitHub Release is archived with a citable DOI.",
+  "creators": [
+    {
+      "name": "Synaptic Four",
+      "affiliation": "Synaptic Four"
+    }
+  ],
+  "keywords": [
+    "technical reports",
+    "bioinformatics",
+    "GA4GH",
+    "FAIR data",
+    "genomics",
+    "research infrastructure"
+  ],
+  "license": "CC-BY-4.0",
+  "communities": [
+    {
+      "identifier": "zenodo"
+    }
+  ],
+  "notes": "Enable GitHub integration at https://zenodo.org/account/settings/github/ and toggle ON for SynapticFour/technical-reports. See docs/zenodo-integration.md."
+}

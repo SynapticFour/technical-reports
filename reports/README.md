@@ -18,10 +18,10 @@ reports/SF-TR-YYYY-NNN/
 # 1. Allocate number — see docs/numbering.md
 # 2. Register in publications-index/catalog.yaml
 # 3. Copy template
-cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
+cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-002
 
 # 4. Render
-cd reports/SF-TR-2026-001
+cd reports/SF-TR-2026-002
 quarto render paper.qmd
 ```
 
@@ -31,6 +31,6 @@ Outputs are written to `reports/SF-TR-YYYY-NNN/_output/` (gitignored).
 
 See [publications-index/catalog.yaml](../publications-index/catalog.yaml) for the authoritative list.
 
-| ID | Title | Status |
-|----|-------|--------|
-| — | No reports published yet | — |
+| ID | Title | Status | Version |
+|----|-------|--------|---------|
+| [SF-TR-2026-001](SF-TR-2026-001/) | Ferrum Architecture: A GA4GH-Native Genomics Platform | published | 1.0.0 |

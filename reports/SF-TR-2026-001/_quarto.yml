@@ -1,0 +1,37 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    anchor-sections: true
+    css: ../../styles/report.css
+  pdf:
+    documentclass: report
+    papersize: a4
+    fontsize: 11pt
+    geometry:
+      - margin=2.5cm
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    include-in-header:
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{longtable}
+          \usepackage{hyperref}
+
+bibliography: references.bib
+csl: ../../csl/ieee.csl
+
+execute:
+  freeze: auto
+  echo: false
+  warning: false
+
+lang: en

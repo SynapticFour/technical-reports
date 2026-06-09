@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
+authors:
+  - name: Synaptic Four
+    affiliation: Synaptic Four
+message: "If you use this work, please cite using the DOI once published on Zenodo."
+type: report
+keywords:
+  - GA4GH
+  - genomics
+  - Ferrum
+  - architecture
+  - Crypt4GH
+  - HelixTest
+license: CC-BY-4.0
+repository-code: 'https://github.com/SynapticFour/technical-reports/tree/main/reports/SF-TR-2026-001'
+url: 'https://synapticfour.com/publications/sf-tr-2026-001'
+date-released: '2026-06-09'
