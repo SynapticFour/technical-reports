@@ -28,10 +28,10 @@ reports:
       - Ferrum
       - Crypt4GH
       - HelixTest
-    doi: ""
-    zenodo: ""
+    doi: "10.5281/zenodo.20612210"
+    zenodo: "https://zenodo.org/records/20612210"
     github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-001-v1.0.0"
-    website: "https://synapticfour.com/publications/sf-tr-2026-001"
+    website: "https://synapticfour.com/en/publications/sf-tr-2026-001"
     path: reports/SF-TR-2026-001
     formats:
       html: true

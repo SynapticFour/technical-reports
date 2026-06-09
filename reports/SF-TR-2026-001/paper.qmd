@@ -29,8 +29,8 @@ abstract: |
   how Synaptic Four uses AI-assisted engineering transparently—as acceleration, not
   a substitute for engineering judgement.
 license: CC BY 4.0
-doi: ""
-zenodo: ""
+doi: "10.5281/zenodo.20612210"
+zenodo: "https://zenodo.org/records/20612210"
 github-release: ""
 format:
   html:

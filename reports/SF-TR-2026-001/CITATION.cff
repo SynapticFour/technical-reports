@@ -3,8 +3,9 @@ title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
 authors:
   - name: Synaptic Four
     affiliation: Synaptic Four
-message: "If you use this work, please cite using the DOI once published on Zenodo."
+message: "If you use this work, please cite using the DOI."
 type: report
+doi: 10.5281/zenodo.20612210
 keywords:
   - GA4GH
   - genomics

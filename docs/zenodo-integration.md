@@ -18,6 +18,36 @@ Guide to archiving Synaptic Four Technical Reports on [Zenodo](https://zenodo.or
 - Zenodo account linked to GitHub
 - At least one GitHub Release with rendered assets
 
+## Private repository? (important)
+
+**Zenodo’s GitHub integration only works with public repositories.**
+
+Zenodo states explicitly that it has **no access to private repositories** and only installs webhooks on **public** repos ([Zenodo FAQ](https://support.zenodo.org/help/en-gb/24-github-integration/127-which-github-permissions-do-you-request-and-why)). If `technical-reports` is private you will see:
+
+- The repo **missing** from Zenodo’s GitHub list (or the toggle has no effect)
+- **No Zenodo webhook** under GitHub → Settings → Webhooks
+
+**Recommended for SF-TR:** Make `technical-reports` **public**. Reports are CC BY 4.0, citable, and intended for open distribution—same as publishing on synapticfour.com and Zenodo.
+
+**If you must keep the repo private:** Skip the GitHub toggle entirely. Use `scripts/zenodo-publish.sh` with a Zenodo personal access token (uploads release PDF/HTML via API; see below).
+
+## What GitHub Auth Does (and Does Not Do)
+
+Signing in to Zenodo with GitHub is **step 1 only**. It links your accounts but does **not** automatically enable archival for `technical-reports`.
+
+After GitHub auth, you must still:
+
+1. Open **Account settings → GitHub**: https://zenodo.org/account/settings/github/
+2. Grant access to the **SynapticFour** organisation (if prompted)
+3. Find **`technical-reports`** in the repository list
+4. Toggle the switch **ON** (blue)
+
+Until that toggle is enabled, releases will not create Zenodo drafts.
+
+**Can this be done via API?** No. Zenodo does not expose an API to enable the GitHub webhook integration. That step requires the Zenodo web UI.
+
+**API alternative for deposits:** Use `scripts/zenodo-publish.sh` with a [personal access token](https://zenodo.org/account/settings/applications/tokens/new/) (scopes: `deposit:write`, `deposit:actions`). This creates a deposition manually without the GitHub toggle, but the GitHub integration is still recommended for ongoing releases.
+
 ## One-Time Setup
 
 ### 1. Connect GitHub to Zenodo
@@ -66,6 +96,18 @@ sequenceDiagram
   Author->>Website: Add publication page with DOI link
 ```
 
+### Existing release before you enabled Zenodo?
+
+Zenodo only auto-ingests releases created **after** the repository toggle is ON. Release `SF-TR-2026-001-v1.0.0` predates enablement, so you must re-notify Zenodo once:
+
+**Option A (simplest):** On GitHub, open the release → edit the description (add a blank line) → save. This re-fires the Zenodo webhook.
+
+**Option B:** GitHub → `technical-reports` → **Settings → Webhooks** → **Zenodo** → **Recent deliveries** → **Redeliver** the latest event.
+
+**Option C:** Run `scripts/trigger-zenodo-release.sh` with `ZENODO_HOOK_TOKEN` copied from the Zenodo webhook URL (query parameter `access_token`).
+
+Then open https://zenodo.org/me/uploads — a **draft** deposit should appear within a few minutes.
+
 ### Steps
 
 1. **Create GitHub Release** with tag `SF-TR-YYYY-NNN-vX.Y.Z`.
@@ -78,10 +120,16 @@ sequenceDiagram
    - License matches report front matter
    - `SF-TR-YYYY-NNN` appears in keywords or description
 5. **Publish** the deposit to mint the DOI.
-6. **Record the DOI** in:
-   - `publications-index/catalog.yaml`
-   - Report `paper.qmd` front matter (`doi:` field)
-   - synapticfour.com publication page
+6. **Backfill the DOI** (after publishing — use the real values from Zenodo, not placeholders):
+
+```bash
+cd technical-reports
+./scripts/update-doi.sh SF-TR-2026-001 10.5281/zenodo.1234568
+# optional third argument: numeric record id from the Zenodo URL
+./scripts/update-doi.sh SF-TR-2026-001 10.5281/zenodo.1234568 1234568
+```
+
+In zsh, do **not** type square brackets `[record-id]` — that is documentation notation only; zsh treats `[...]` as a glob pattern.
 
 ## DOI Structure
 
@@ -112,6 +160,8 @@ doi: 10.5281/zenodo.XXXXXXX
 
 | Issue | Resolution |
 |-------|------------|
+| Webhook redelivery returns **403 Forbidden** (“unusual traffic”) | Zenodo’s edge firewall blocked GitHub’s request—not a repo config error. **Workaround:** use `scripts/zenodo-publish.sh` with a Zenodo personal token. **Long-term:** retry later, create a new release, or contact [Zenodo support](https://zenodo.org/support) with the `Reference` code from the error page. |
+| Repo not listed in Zenodo | Repository must be **public**; click **Sync now** on Zenodo GitHub settings; grant Zenodo access to the GitHub organisation. |
 | No Zenodo draft after release | Confirm repo is enabled in Zenodo GitHub settings; check release is on `main` default branch |
 | Missing PDF in deposit | Verify CI completed; PDF requires TinyTeX in workflow |
 | Wrong files archived | Zenodo archives the repository snapshot at release tag; ensure tag points to correct commit |
