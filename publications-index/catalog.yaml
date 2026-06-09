@@ -13,7 +13,7 @@ reports:
     title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
     category: architecture
     status: published
-    version: "1.0.0"
+    version: "1.0.1"
     date: "2026-06-09"
     authors:
       - Synaptic Four

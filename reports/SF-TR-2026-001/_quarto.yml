@@ -20,11 +20,24 @@ format:
     toc: true
     toc-depth: 3
     number-sections: true
+    fig-dpi: 300
+    fig-width: 6.0
+    fig-height: 4.5
+    fig-pos: 'H'
     include-in-header:
       - text: |
           \usepackage{booktabs}
           \usepackage{longtable}
+          \usepackage{tabularx}
+          \usepackage{graphicx}
+          \usepackage{adjustbox}
+          \usepackage{float}
+          \usepackage{placeins}
           \usepackage{hyperref}
+          \graphicspath{{figures/}}
+          \setkeys{Gin}{width=\linewidth,keepaspectratio}
+          \floatplacement{figure}{H}
+          \usepackage{microtype}
 
 bibliography: references.bib
 csl: ../../csl/ieee.csl

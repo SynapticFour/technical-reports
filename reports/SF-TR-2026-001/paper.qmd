@@ -7,7 +7,7 @@ author:
     email: contact@synapticfour.com
 date: "2026-06-09"
 date-format: "D MMMM YYYY"
-version: "1.0.0"
+version: "1.0.1"
 report-id: SF-TR-2026-001
 report-category: architecture
 keywords:
@@ -53,7 +53,7 @@ Benchmark scope is intentionally modest—small synthetic-style genomic slices w
 
 # Introduction
 
-The Global Alliance for Genomics and Health (GA4GH) defines interoperable APIs for genomic data discovery, access, and compute. Research organisations, clinical laboratories, and national infrastructures increasingly require implementations that exercise multiple standards together in real pipelines—not isolated API endpoints.
+The Global Alliance for Genomics and Health (GA4GH) defines interoperable APIs for genomic data discovery, access, and compute [@ga4gh2024framework]. Research organisations, clinical laboratories, and national infrastructures increasingly require implementations that exercise multiple standards together in real pipelines—not isolated API endpoints.
 
 This report documents the Ferrum platform architecture, implementation choices, validation methodology, and deployment patterns. It supersedes the shorter web overview at [synapticfour.com](https://synapticfour.com/ferrum-white-paper) as the canonical technical source for Ferrum architecture (identifier SF-TR-2026-001).
 
@@ -76,9 +76,9 @@ GA4GH specifies APIs including:
 | **htsget** | Partial read retrieval from sequencing files |
 | **Beacon** | Variant existence queries |
 | **Passports** | Authorisation and data access policies |
-| **Crypt4GH** | Encrypted genomics data exchange |
+| **Crypt4GH** | Encrypted genomics data exchange [@crypt4gh2020] |
 
-Production systems often implement subsets. Cross-service stacks with unified authentication, shared metadata, and continuous conformance testing remain uncommon.
+Production systems often implement subsets. DRS object access patterns follow the GA4GH DRS specification [@drs2021v1]. Cross-service stacks with unified authentication, shared metadata, and continuous conformance testing remain uncommon.
 
 ## Synaptic Four context
 
@@ -90,9 +90,9 @@ Research and clinical genomics teams need:
 
 1. **Integrated GA4GH services** that work together in end-to-end pipelines (TRS → DRS → WES → TES).
 2. **On-premises-first deployment** with selective service activation—not mandatory cloud dependency.
-3. **Encryption at rest and per-requester delivery** via Crypt4GH without breaking DRS access patterns.
-4. **Reproducible validation** that any operator can run independently.
-5. **Honest performance claims** with documented dataset scope and limitations.
+3. **Encryption at rest and per-requester delivery** via Crypt4GH [@crypt4gh2020] without breaking DRS access patterns [@drs2021v1].
+4. **Reproducible validation** that any operator can run independently [@helixtest2026].
+5. **Honest performance claims** with documented dataset scope and limitations, aligned with FAIR documentation practice [@wilkinson2016fair].
 
 Existing component implementations (TESK, Funnel, cwl-WES, WESkit, GA4GH Starter Kit pieces, Galaxy integrations) address individual standards well. The gap is a focused integration point combining TRS + DRS + WES + TES + htsget + Beacon + Passports + Crypt4GH in one runtime with a unified gateway and continuous cross-service tests.
 
@@ -107,16 +107,38 @@ Strong open-source implementations exist across the GA4GH ecosystem:
 
 Ferrum does not replace these projects. It targets organisations needing a composable, on-premises-first runtime that exercises the standards together. Ferrum Lab Kit (BUSL-1.1) provides an opinionated on-ramp for laboratories, ELIXIR node candidates, and GDI-style footprints.
 
-Independent validation is provided by **HelixTest** (Apache-2.0), maintained by Synaptic Four and reusable against any GA4GH-compatible platform.
+Independent validation is provided by **HelixTest** (Apache-2.0) [@helixtest2026], maintained by Synaptic Four and reusable against any GA4GH-compatible platform.
 
 # System Architecture
 
 ## High-level design
 
-Services are composed behind a single **ferrum-gateway** (Rust, async). Metadata resides in PostgreSQL; objects in S3-compatible storage (MinIO, cloud S3, POSIX, OpenDAL-backed backends).
+Services are composed behind a single **ferrum-gateway** (Rust, async) [@ferrum2026]. Metadata resides in PostgreSQL; objects in S3-compatible storage (MinIO, cloud S3, POSIX, OpenDAL-backed backends).
+
+::: {.content-visible when-format="pdf"}
+
+**Figure — Ferrum GA4GH demo data plane** (logical flow; see Ferrum GA4GH Demo [@ferrum_demo2026]).
+
+| Step | Component | Action |
+|------|-----------|--------|
+| 1 | Client (`demo/run.sh`) | Multipart ingest to DRS |
+| 2 | ferrum-gateway | Routes GA4GH API requests |
+| 3 | DRS | Ingest + object stream (`/ingest`, `/objects`) |
+| 4 | TRS | Tool descriptor resolution (`/tools`) |
+| 5 | WES | Workflow run submission (`/runs`) |
+| 6 | TES | Task dispatch (`/tasks`) → Cromwell or Nextflow |
+| 7 | Execution | GATK container via Docker socket |
+| 8 | Storage | PostgreSQL metadata + MinIO objects |
+
+:::
+
+::: {.content-visible when-format="html"}
 
 ```{mermaid}
 %%| fig-cap: Ferrum GA4GH demo data plane (Ferrum GA4GH Demo)
+%%| fig-width: 6.5
+%%| fig-height: 5.5
+%%| fig-format: png
 flowchart TB
   subgraph Client
     R[demo/run.sh]
@@ -146,6 +168,8 @@ flowchart TB
   G --> WES
   G --> TES
 ```
+
+:::
 
 ## Gateway and service composition
 
@@ -191,7 +215,7 @@ Environment variables control work directory paths, Docker socket mounting, and 
 
 ## Ferrum GA4GH Demo
 
-The [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo) (Apache-2.0) provides a reproducible end-to-end stack:
+The [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo) (Apache-2.0) [@ferrum_demo2026] provides a reproducible end-to-end stack:
 
 - GIAB-style synthetic subset (GRCh37 chr22 window)
 - DRS micro-benchmarks (`scripts/drs_micro_benchmark.py`)
@@ -298,6 +322,7 @@ The GA4GH community and contributors to TESK, Funnel, cwl-WES, WESkit, the GA4GH
 | Version | Date | Summary |
 |---------|------|---------|
 | 1.0.0 | 2026-06-09 | Initial release; migrated from Ferrum white paper web content |
+| 1.0.1 | 2026-06-09 | PDF layout fixes; inline citations; PDF-safe architecture figure |
 
 ## Appendix D: Relationship to web white paper
 

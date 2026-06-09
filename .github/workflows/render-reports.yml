@@ -77,7 +77,11 @@ jobs:
       - name: Install LaTeX packages
         run: |
           tlmgr update --self --all || true
-          tlmgr install booktabs longtable fancyhdr caption multirow enumitem || true
+          tlmgr install booktabs longtable fancyhdr caption multirow enumitem \
+            graphicx adjustbox float placeins tabularx microtype wrapfig xcolor || true
+
+      - name: Install Chromium for Mermaid (HTML render)
+        run: quarto install chromium --no-prompt || true
 
       - name: Render report
         working-directory: reports/${{ matrix.report }}
