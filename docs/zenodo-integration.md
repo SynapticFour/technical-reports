@@ -48,6 +48,31 @@ Until that toggle is enabled, releases will not create Zenodo drafts.
 
 **API alternative for deposits:** Use `scripts/zenodo-publish.sh` with a [personal access token](https://zenodo.org/account/settings/applications/tokens/new/) (scopes: `deposit:write`, `deposit:actions`). This creates a deposition manually without the GitHub toggle, but the GitHub integration is still recommended for ongoing releases.
 
+## Automate with GitHub Actions (recommended)
+
+Store your Zenodo token as a **repository secret** (not in code):
+
+1. Create a token: [zenodo.org/account/settings/applications/tokens/new](https://zenodo.org/account/settings/applications/tokens/new/)  
+   Scopes: **`deposit:write`**, **`deposit:actions`**
+2. GitHub → `technical-reports` → **Settings → Secrets and variables → Actions → New repository secret**  
+   Name: `ZENODO_ACCESS_TOKEN`
+3. Optional variable: `ZENODO_RECORD_ID` = `20612210` (latest published version record)
+
+Workflow **Zenodo Release Draft** (`.github/workflows/zenodo-release.yml`):
+
+- **On each GitHub Release:** uploads PDF/HTML as a **Zenodo draft** (does **not** publish or mint a new DOI unless you opt in).
+- **Manual run:** Actions → Zenodo Release Draft → Run workflow → specify release tag.
+
+```bash
+# Local equivalent (draft only):
+export ZENODO_ACCESS_TOKEN='...'
+./scripts/zenodo-new-version.sh SF-TR-2026-001 SF-TR-2026-001-v1.0.1 20612210
+```
+
+Review the draft at [zenodo.org/me/uploads](https://zenodo.org/me/uploads), then click **Publish** when the document is ready. That mints the **version DOI**; the concept DOI `10.5281/zenodo.20612209` stays the same.
+
+**You do not need a new Zenodo version while revising the report.** Iterate on GitHub (`paper.qmd`, re-render, new release tag) and only run the Zenodo workflow when you are satisfied.
+
 ## One-Time Setup
 
 ### 1. Connect GitHub to Zenodo
