@@ -142,7 +142,7 @@ Candidate reports for the Synaptic Four Technical Report Series. Priorities are 
 
 | Order | Report | Target SF-TR |
 |-------|--------|--------------|
-| 1 | Ferrum Architecture | SF-TR-2026-001 |
+| 1 | Ferrum Architecture | SF-TR-2026-001 ✓ published v1.0.0 |
 | 2 | Mycelium Architecture | SF-TR-2026-002 |
 | 3 | DRS Implementation Guide | SF-TR-2026-003 |
 | 4 | GA4GH Data Connect in Practice | SF-TR-2026-004 |
