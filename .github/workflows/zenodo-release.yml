@@ -3,11 +3,11 @@ name: Zenodo Release Draft
 # Uploads release PDF/HTML to Zenodo as a *draft* new version.
 # Publishing (new version DOI) stays manual in the Zenodo UI unless you opt in.
 #
-# Required repository secret:
+# Required repository secret (Settings → Secrets and variables → Actions):
 #   ZENODO_ACCESS_TOKEN — https://zenodo.org/account/settings/applications/tokens/new/
 #                       scopes: deposit:write, deposit:actions
 #
-# Optional repository variable (Settings → Secrets and variables → Actions → Variables):
+# Optional repository variable:
 #   ZENODO_RECORD_ID — latest published version record id (default: 20612210)
 
 on:
@@ -41,12 +41,24 @@ permissions:
 jobs:
   zenodo-draft:
     runs-on: ubuntu-latest
-    # Only run when the token is configured
-    if: ${{ secrets.ZENODO_ACCESS_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
 
+      # secrets.* cannot be used in job-level `if:` — check inside a step instead.
+      - name: Check Zenodo token configured
+        id: token
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+        run: |
+          if [ -z "${ZENODO_ACCESS_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::ZENODO_ACCESS_TOKEN repository secret is not set; skipping Zenodo upload."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Resolve inputs
+        if: steps.token.outputs.configured == 'true'
         id: vars
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -64,12 +76,14 @@ jobs:
           fi
 
       - name: Install tools
+        if: steps.token.outputs.configured == 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq jq curl
           gh --version
 
       - name: Upload Zenodo draft (no publish by default)
+        if: steps.token.outputs.configured == 'true'
         env:
           ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
           ZENODO_PUBLISH: ${{ steps.vars.outputs.publish }}
