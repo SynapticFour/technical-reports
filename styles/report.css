@@ -1,0 +1,40 @@
+/* Synaptic Four Technical Report — HTML stylesheet */
+
+:root {
+  --sf-navy: #1a2744;
+  --sf-teal: #0d9488;
+}
+
+body {
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.65;
+  color: #1e293b;
+}
+
+h1, h2, h3, h4 {
+  color: var(--sf-navy);
+  font-weight: 600;
+}
+
+.title {
+  color: var(--sf-navy);
+}
+
+.abstract {
+  background: #f8fafc;
+  border-left: 4px solid var(--sf-teal);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+table {
+  font-size: 0.95em;
+}
+
+code {
+  font-size: 0.9em;
+}
+
+.quarto-title-meta {
+  font-size: 0.95em;
+}

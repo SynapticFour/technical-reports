@@ -1,0 +1,64 @@
+name: Validate Publications Index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'publications-index/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'publications-index/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Validate catalog.yaml
+        run: |
+          python3 << 'PYEOF'
+          import sys
+          import yaml
+          from pathlib import Path
+
+          catalog_path = Path("publications-index/catalog.yaml")
+          if not catalog_path.exists():
+              print("catalog.yaml not found")
+              sys.exit(1)
+
+          with open(catalog_path) as f:
+              data = yaml.safe_load(f)
+
+          required_top = ["series", "reports"]
+          for key in required_top:
+              if key not in data:
+                  print(f"Missing top-level key: {key}")
+                  sys.exit(1)
+
+          ids = set()
+          for report in data.get("reports", []):
+              for field in ["id", "title", "category", "status"]:
+                  if field not in report:
+                      print(f"Report missing field '{field}': {report}")
+                      sys.exit(1)
+              rid = report["id"]
+              if not rid.startswith("SF-TR-"):
+                  print(f"Invalid report id format: {rid}")
+                  sys.exit(1)
+              if rid in ids:
+                  print(f"Duplicate report id: {rid}")
+                  sys.exit(1)
+              ids.add(rid)
+
+          print(f"Validated {len(ids)} report entries.")
+          PYEOF

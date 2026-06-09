@@ -1,0 +1,44 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-summary: "Show code"
+    anchor-sections: true
+    fig-dpi: 150
+    fig-width: 6.5
+    fig-height: 4
+    css: styles/report.css
+  pdf:
+    documentclass: report
+    papersize: a4
+    fontsize: 11pt
+    geometry:
+      - margin=2.5cm
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    fig-dpi: 300
+    fig-width: 6.5
+    fig-height: 4
+    include-in-header:
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{longtable}
+          \usepackage{hyperref}
+
+bibliography: references.bib
+csl: ../../csl/ieee.csl
+
+execute:
+  freeze: auto
+  echo: false
+  warning: false
+
+lang: en

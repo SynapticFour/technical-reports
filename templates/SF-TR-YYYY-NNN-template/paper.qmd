@@ -1,0 +1,130 @@
+---
+title: "Report Title: Descriptive Subtitle"
+subtitle: "Synaptic Four Technical Report SF-TR-YYYY-NNN"
+author:
+  - name: Author One
+    affiliation: Synaptic Four
+    orcid: 0000-0000-0000-0000
+    email: author@synapticfour.com
+  - name: Author Two
+    affiliation: Partner Organization
+    orcid: 0000-0000-0000-0000
+date: last-modified
+date-format: "D MMMM YYYY"
+version: "1.0.0"
+report-id: SF-TR-YYYY-NNN
+report-category: architecture
+keywords:
+  - bioinformatics
+  - FAIR data
+  - GA4GH
+  - genomics
+abstract: |
+  Provide a concise abstract (150–300 words) summarising the problem addressed,
+  approach taken, principal findings or contributions, and intended audience.
+  The abstract should stand alone for discovery in catalogues and search engines.
+license: CC BY 4.0
+doi: ""
+zenodo: ""
+github-release: ""
+format:
+  html:
+    toc: true
+    number-sections: true
+  pdf:
+    toc: true
+    number-sections: true
+bibliography: references.bib
+csl: ../../csl/ieee.csl
+---
+
+# Executive Summary {.unnumbered}
+
+Brief overview for readers who need the essential conclusions without full technical detail. One to three paragraphs.
+
+# Introduction
+
+Introduce the context, motivation, and scope of this report. State what the reader will learn and who should read it.
+
+# Background
+
+Provide domain context, terminology, and assumptions. Define acronyms on first use.
+
+# Problem Statement
+
+Articulate the specific technical, architectural, or methodological problem this report addresses. Be precise about constraints and success criteria.
+
+# Related Work
+
+Survey relevant standards, prior implementations, academic literature, and competing or complementary approaches. Position Synaptic Four's contribution relative to existing work.
+
+# System Architecture
+
+Describe the high-level architecture. Include diagrams where helpful.
+
+```{mermaid}
+%%| fig-cap: Example architecture diagram (replace with project-specific content)
+flowchart LR
+  A[Data Sources] --> B[Ingestion Layer]
+  B --> C[Processing]
+  C --> D[API / Access Layer]
+  D --> E[Consumers]
+```
+
+Document major components, interfaces, data flows, and design decisions.
+
+# Implementation
+
+Detail implementation choices: languages, frameworks, libraries, configuration patterns, and key algorithms. Reference source repositories where applicable.
+
+# Deployment
+
+Describe deployment topology, infrastructure requirements, operational procedures, and environment-specific considerations.
+
+# Security Considerations
+
+Address threat model, authentication and authorisation, encryption, audit logging, data residency, and compliance-relevant controls.
+
+# Performance Considerations
+
+Report benchmarks, scalability characteristics, resource requirements, and known bottlenecks where measured.
+
+# Limitations
+
+State known limitations, unsupported use cases, and assumptions that may not hold in all environments.
+
+# Future Work
+
+Outline planned improvements, open questions, and areas for community or collaborator contribution.
+
+# Conclusion
+
+Summarise principal contributions and recommendations. State actionable next steps for readers.
+
+# Acknowledgements {.unnumbered}
+
+Acknowledge funding sources, collaborators, reviewers, and upstream open-source projects.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+# Appendices {.unnumbered}
+
+## Appendix A: Glossary
+
+| Term | Definition |
+|------|------------|
+| DRS  | Data Repository Service (GA4GH) |
+| FAIR | Findable, Accessible, Interoperable, Reusable |
+
+## Appendix B: Configuration Reference
+
+Include supplementary tables, API excerpts, or configuration examples that support the main text but would interrupt narrative flow.
+
+## Appendix C: Change Log
+
+| Version | Date | Summary |
+|---------|------|---------|
+| 1.0.0   | YYYY-MM-DD | Initial release |

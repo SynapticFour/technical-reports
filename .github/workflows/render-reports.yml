@@ -1,0 +1,136 @@
+name: Render Technical Reports
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'reports/**'
+      - 'csl/**'
+      - 'styles/**'
+      - '_quarto.yml'
+      - '.github/workflows/render-reports.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'reports/**'
+      - 'csl/**'
+      - 'styles/**'
+      - '_quarto.yml'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      report_id:
+        description: 'Report ID (e.g. SF-TR-2026-001) or "all"'
+        required: false
+        default: 'all'
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build report matrix
+        id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+            REPORT_ID="${TAG%%-v*}"
+            if [ -d "reports/${REPORT_ID}" ]; then
+              echo "matrix={\"report\":[\"${REPORT_ID}\"]}" >> "$GITHUB_OUTPUT"
+            else
+              echo "matrix={\"report\":[]}" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.report_id }}" != "all" ] && [ -n "${{ inputs.report_id }}" ]; then
+            echo "matrix={\"report\":[\"${{ inputs.report_id }}\"]}" >> "$GITHUB_OUTPUT"
+          else
+            REPORTS=$(find reports -mindepth 1 -maxdepth 1 -type d -name 'SF-TR-*' -exec basename {} \; | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            if [ "$REPORTS" = "[]" ] || [ -z "$REPORTS" ]; then
+              echo "matrix={\"report\":[]}" >> "$GITHUB_OUTPUT"
+            else
+              echo "matrix={\"report\":${REPORTS}}" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+  render:
+    needs: discover
+    if: needs.discover.outputs.matrix != '{"report":[]}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Set up TinyTeX
+        uses: r-lib/actions/setup-tinytex@v2
+
+      - name: Install LaTeX packages
+        run: |
+          tlmgr update --self --all || true
+          tlmgr install booktabs longtable fancyhdr caption multirow enumitem || true
+
+      - name: Render report
+        working-directory: reports/${{ matrix.report }}
+        run: quarto render paper.qmd
+
+      - name: Upload HTML artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.report }}-html
+          path: reports/${{ matrix.report }}/_output/paper.html
+          if-no-files-found: error
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.report }}-pdf
+          path: reports/${{ matrix.report }}/_output/paper.pdf
+          if-no-files-found: warn
+
+  release-assets:
+    needs: [discover, render]
+    if: github.event_name == 'release' && needs.discover.outputs.matrix != '{"report":[]}'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all render artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: SF-TR-*
+          merge-multiple: true
+          path: dist
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          for dir in dist/*-html/; do
+            [ -d "$dir" ] || continue
+            report_id=$(basename "$dir" -html)
+            cp "${dir}paper.html" "release-assets/${report_id}.html"
+          done
+          for dir in dist/*-pdf/; do
+            [ -d "$dir" ] || continue
+            report_id=$(basename "$dir" -pdf)
+            if [ -f "${dir}paper.pdf" ]; then
+              cp "${dir}paper.pdf" "release-assets/${report_id}.pdf"
+            fi
+          done
+          ls -la release-assets/
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: Synaptic Four Technical Report Series
+message: >-
+  If you use this repository or individual technical reports in your work,
+  please cite the relevant report using its DOI where available.
+type: software
+authors:
+  - name: Synaptic Four
+    affiliation: Synaptic Four
+repository-code: 'https://github.com/SynapticFour/technical-reports'
+url: 'https://synapticfour.com/publications'
+license: CC-BY-4.0
+keywords:
+  - technical reports
+  - bioinformatics
+  - FAIR data
+  - GA4GH
+  - genomics
+  - federated data
+  - research infrastructure
+preferred-citation:
+  type: report
+  title: Synaptic Four Technical Report Series
+  authors:
+    - name: Synaptic Four
+  year: 2026
+  institution: Synaptic Four
+  url: 'https://github.com/SynapticFour/technical-reports'

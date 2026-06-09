@@ -1,0 +1,34 @@
+# Synaptic Four Technical Report Series — machine-readable catalogue
+# Update this file when registering, publishing, or revising reports.
+
+series:
+  id: SF-TR
+  name: Synaptic Four Technical Report Series
+  publisher: Synaptic Four
+  repository: https://github.com/SynapticFour/technical-reports
+  website: https://synapticfour.com/publications
+
+reports: []
+  # Example entry (uncomment and adapt when publishing):
+  #
+  # - id: SF-TR-2026-001
+  #   title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
+  #   category: architecture
+  #   status: published          # draft | in_review | published | revised | withdrawn
+  #   version: "1.0.0"
+  #   date: "2026-06-01"
+  #   authors:
+  #     - Synaptic Four
+  #   abstract: >
+  #     Short abstract for index pages and discovery.
+  #   keywords:
+  #     - GA4GH
+  #     - genomics
+  #   doi: "10.5281/zenodo.XXXXXXX"
+  #   zenodo: "https://zenodo.org/record/XXXXXXX"
+  #   github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-001-v1.0.0"
+  #   website: "https://synapticfour.com/publications/sf-tr-2026-001"
+  #   path: reports/SF-TR-2026-001
+  #   formats:
+  #     html: true
+  #     pdf: true
