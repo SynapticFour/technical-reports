@@ -71,6 +71,13 @@ export ZENODO_ACCESS_TOKEN='...'
 
 Review the draft at [zenodo.org/me/uploads](https://zenodo.org/me/uploads), then click **Publish** when the document is ready. That mints the **version DOI**; the concept DOI `10.5281/zenodo.20612209` stays the same.
 
+### Draft not visible in the browser?
+
+- **Unpublished drafts do not appear** on the public record page ([zenodo.org/records/20612210](https://zenodo.org/records/20612210)) — only after **Publish**.
+- Open **[zenodo.org/me/uploads](https://zenodo.org/me/uploads)** (not the public record URL).
+- The `ZENODO_ACCESS_TOKEN` must belong to the **same Zenodo account** you use in the browser. Tokens created while logged in via GitHub are tied to that linked account; a token from a different email will upload to an account you are not viewing.
+- If the GitHub Actions workflow fails with HTTP **500** on `/versions`, an open draft may be stuck: delete it under **Uploads**, clear workflow input `zenodo_draft_id`, and re-run — or use **New version** manually on the Zenodo website.
+
 **You do not need a new Zenodo version while revising the report.** Iterate on GitHub (`paper.qmd`, re-render, new release tag) and only run the Zenodo workflow when you are satisfied.
 
 ## One-Time Setup

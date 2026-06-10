@@ -81,8 +81,18 @@ else
   cat /tmp/zenodo-version.json >&2 2>/dev/null || true
   if [ -n "${ZENODO_DRAFT_ID:-}" ]; then
     echo "Reusing ZENODO_DRAFT_ID=${ZENODO_DRAFT_ID}" >&2
-    NEW_VERSION=$(curl -fsS "${ZENODO_API}/records/${ZENODO_DRAFT_ID}/draft" \
-      -H "Authorization: Bearer ${TOKEN}")
+    for draft_url in \
+      "${ZENODO_API}/records/${ZENODO_DRAFT_ID}/draft" \
+      "${ZENODO_API}/records/${ZENODO_DRAFT_ID}" \
+      "${ZENODO_API}/deposit/depositions/${ZENODO_DRAFT_ID}"; do
+      DRAFT_HTTP=$(curl -sS -o /tmp/zenodo-draft.json -w '%{http_code}' \
+        "$draft_url" -H "Authorization: Bearer ${TOKEN}")
+      if [ "$DRAFT_HTTP" -lt 400 ]; then
+        NEW_VERSION=$(cat /tmp/zenodo-draft.json)
+        break
+      fi
+      echo "GET ${draft_url} → HTTP ${DRAFT_HTTP}" >&2
+    done
   else
     PUBLISHED=$(curl -sS "${ZENODO_API}/records/${ZENODO_RECORD_ID}" \
       -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{}')
@@ -103,8 +113,17 @@ fi
 
 if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
   echo "ERROR: No Zenodo draft available." >&2
-  echo "Open https://zenodo.org/me/uploads — delete any stale SF-TR draft, or set ZENODO_DRAFT_ID." >&2
-  echo "Ensure ZENODO_ACCESS_TOKEN belongs to the same Zenodo account you use in the browser." >&2
+  echo "" >&2
+  echo "Common causes:" >&2
+  echo "  1. ZENODO_ACCESS_TOKEN is from a different Zenodo account than your browser login." >&2
+  echo "  2. A broken open draft blocks new versions — delete it at https://zenodo.org/me/uploads" >&2
+  echo "  3. Zenodo server error (HTTP 500) — retry later or upload manually via the web UI." >&2
+  echo "" >&2
+  echo "Manual fallback: Zenodo → record 20612210 → New version → upload PDF/HTML from GitHub release v1.0.2." >&2
+  DRAFTS=$(curl -sS "${ZENODO_API}/deposit/depositions?status=draft&size=5" \
+    -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{}')
+  echo "Drafts visible to this token:" >&2
+  echo "$DRAFTS" | jq -r '.[]? | "  - id \(.id): \(.metadata.title // .title // "untitled")"' 2>/dev/null || echo "  (could not list — check token scopes)" >&2
   exit 1
 fi
 
