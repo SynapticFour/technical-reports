@@ -20,18 +20,27 @@ PAYLOAD=$("${ROOT}/scripts/zenodo-metadata-json.sh" "${REPORT_ID}" "${PARENT_REC
 DRAFT_URL=""
 for url in \
   "${ZENODO_API}/records/${DRAFT_ID}/draft" \
-  "${ZENODO_API}/records/${DRAFT_ID}"; do
+  "${ZENODO_API}/records/${DRAFT_ID}" \
+  "${ZENODO_API}/deposit/depositions/${DRAFT_ID}"; do
   HTTP=$(curl -sS -o /tmp/zenodo-draft-check.json -w '%{http_code}' \
     "$url" -H "Authorization: Bearer ${TOKEN}")
   if [ "$HTTP" -lt 400 ]; then
-  DRAFT_URL="$url"
+    DRAFT_URL="$url"
     break
   fi
   echo "GET ${url} → HTTP ${HTTP}" >&2
 done
 
 if [ -z "${DRAFT_URL}" ]; then
-  echo "ERROR: Could not resolve draft ${DRAFT_ID}" >&2
+  echo "ERROR: Could not resolve draft ${DRAFT_ID} (published or deleted?)." >&2
+  echo "Open drafts for this token:" >&2
+  curl -sS "${ZENODO_API}/user/deposits?q=status:draft&size=10&sort=mostrecent" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    | jq -r '.hits.hits[]? | "  - id \(.id): \(.metadata.title // "untitled")"' 2>/dev/null \
+    || curl -sS "${ZENODO_API}/deposit/depositions?status=draft&size=10" \
+      -H "Authorization: Bearer ${TOKEN}" \
+      | jq -r '.[]? | "  - id \(.id): \(.metadata.title // .title // "untitled")"' 2>/dev/null \
+    || echo "  (could not list drafts)" >&2
   exit 1
 fi
 
