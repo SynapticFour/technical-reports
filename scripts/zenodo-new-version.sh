@@ -146,14 +146,18 @@ else
     fi
     echo "Uploaded ${asset}"
   done
-  curl -fsS -X PUT "${DRAFT_URL}" \
+  META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_URL}" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -d "$(jq -n \
       --arg v "v${VERSION}" \
       --arg title "${TITLE} (${REPORT_ID})" \
       --arg notes "Synaptic Four Technical Report Series. GitHub release: ${RELEASE_TAG}" \
-      '{metadata: {title: $title, version: $v, notes: $notes}}')"
+      '{metadata: {title: $title, version: $v, notes: $notes}}')")
+  if [ "$META_HTTP" -ge 400 ]; then
+    echo "WARNING: Zenodo metadata update returned HTTP ${META_HTTP} (files are uploaded; edit metadata in UI)." >&2
+    cat /tmp/zenodo-meta-response.json >&2 || true
+  fi
 fi
 
 echo ""
