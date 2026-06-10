@@ -166,6 +166,7 @@ if [ "$META_HTTP" -ge 400 ]; then
   fi
 fi
 echo "Metadata OK."
+cat /tmp/zenodo-meta-response.json | jq '{resource_type: .metadata.resource_type, publication_date: .metadata.publication_date, version: .metadata.version}' 2>/dev/null || true
 
 for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")

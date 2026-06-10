@@ -88,22 +88,22 @@ jq -n \
           publisher: $publisher,
           notes: ($notes + " Report version " + $version + "."),
           access_right: ($p.access_right // "open"),
-          creators: (
-            if ($p.creators // null) then $p.creators
-            else [{name: "Synaptic Four", affiliation: "Synaptic Four"}]
-            end
-          ),
+          creators: [
+            {
+              person_or_org: {
+                name: "Synaptic Four",
+                type: "organizational"
+              },
+              affiliations: [{name: "Synaptic Four"}]
+            }
+          ],
           keywords: (
             ([$report, "technical report", "Synaptic Four Technical Report"]
              + $paper_keywords
              + (if ($p.keywords // null) then $p.keywords else [] end))
             | unique
           ),
-          resource_type: (
-            if ($p.resource_type // null) then $p.resource_type
-            else {title: "Report", type: "publication", subtype: "report"}
-            end
-          ),
+          resource_type: {id: "publication-report"},
           license: (
             if ($p.license // null) then $p.license
             else {id: "cc-by-4.0"}
