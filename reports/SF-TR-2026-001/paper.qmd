@@ -1,15 +1,22 @@
 ---
 title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
 subtitle: "Synaptic Four Technical Report SF-TR-2026-001"
+
 author:
   - name: Synaptic Four
     affiliation: Synaptic Four
     email: contact@synapticfour.com
+    url: https://synapticfour.com
+
 date: "2026-06-09"
 date-format: "D MMMM YYYY"
+
+# Report metadata (custom fields — used by website templates)
 version: "1.0.1"
 report-id: SF-TR-2026-001
 report-category: architecture
+series: "Synaptic Four Technical Reports"
+
 keywords:
   - GA4GH
   - genomics
@@ -17,278 +24,491 @@ keywords:
   - DRS
   - WES
   - TES
+  - TRS
+  - htsget
   - Crypt4GH
   - HelixTest
   - on-premises
+
 abstract: |
   Ferrum implements a broad set of Global Alliance for Genomics and Health (GA4GH)
   APIs in one composable, on-premises-first runtime. This technical report documents
   motivation, system architecture, Crypt4GH integration, multi-engine workflow
   execution, validation with the independent HelixTest conformance suite, and
   reproducible benchmarks via the Apache-2.0 Ferrum GA4GH Demo. It also explains
-  how Synaptic Four uses AI-assisted engineering transparently—as acceleration, not
-  a substitute for engineering judgement.
-license: CC BY 4.0
+  how Synaptic Four uses AI-assisted engineering transparently — as acceleration,
+  not a substitute for engineering judgement.
+
+license: "CC BY 4.0"
+
+# DOI is assigned on Zenodo upload; set here once available
 doi: "10.5281/zenodo.20612210"
 zenodo: "https://zenodo.org/records/20612210"
-github-release: ""
+github-release: "https://github.com/SynapticFour/Ferrum/releases"
+
+citation:
+  type: report
+  publisher: Synaptic Four
+  doi: "10.5281/zenodo.20612210"
+  url: "https://zenodo.org/records/20612210"
+  issued: 2026-06-09
+
+bibliography: references.bib
+csl: ../../csl/ieee.csl   # IEEE numeric style; adjust path to repo root
+
 format:
+
+  # ── HTML (website / GitHub Pages) ────────────────────────────────────
   html:
     toc: true
+    toc-depth: 3
+    toc-title: "Contents"
     number-sections: true
+    number-depth: 3
+    theme: cosmo
+    highlight-style: github
+    code-overflow: wrap
+    fig-align: center
+    cap-location: bottom
+    crossref:
+      fig-title: "Figure"
+      tbl-title: "Table"
+    html-math-method: katex
+    link-external-icon: true
+    link-external-newwindow: true
+
+  # ── PDF (Zenodo archival + download) ─────────────────────────────────
   pdf:
     toc: true
+    toc-depth: 3
     number-sections: true
-bibliography: references.bib
-csl: ../../csl/ieee.csl
+    number-depth: 3
+    documentclass: article
+    papersize: a4
+    fontsize: 11pt
+    geometry:
+      - top=25mm
+      - bottom=25mm
+      - left=25mm
+      - right=25mm
+    colorlinks: true
+    linkcolor: "NavyBlue"
+    urlcolor: "NavyBlue"
+    citecolor: "NavyBlue"
+    fig-align: center
+    cap-location: bottom
+    crossref:
+      fig-title: "Figure"
+      tbl-title: "Table"
+    include-in-header:
+      text: |
+        \usepackage{booktabs}
+        \usepackage{longtable}
+        \usepackage{array}
+        \usepackage{fancyhdr}
+        \usepackage{lastpage}
+        \usepackage{xcolor}
+        \definecolor{ferrumnavy}{HTML}{1B2D5B}
+        \definecolor{ferrumteal}{HTML}{2E8B8B}
+        \pagestyle{fancy}
+        \fancyhf{}
+        \fancyhead[L]{\small\color{gray}Synaptic Four · SF-TR-2026-001}
+        \fancyhead[R]{\small\color{ferrumteal}\textbf{TECHNICAL REPORT}}
+        \fancyfoot[L]{\small\color{gray}DOI: 10.5281/zenodo.20612210 · CC BY 4.0}
+        \fancyfoot[R]{\small\color{gray}Page \thepage\ of \pageref{LastPage}}
+        \renewcommand{\headrulewidth}{0.4pt}
+        \renewcommand{\footrulewidth}{0.4pt}
+        \setlength{\headheight}{14pt}
 ---
+
+```{r}
+#| label: setup
+#| include: false
+# No R packages required for this report.
+# If you add computed tables later, load them here.
+```
 
 # Executive Summary {.unnumbered}
 
-Ferrum is an integrated, on-premises-first runtime that composes a broad set of GA4GH APIs—TRS, DRS, WES, TES, htsget, Beacon, Passports, and Crypt4GH—behind a unified Rust gateway with shared authentication. Synaptic Four built Ferrum because cross-service, reproducible GA4GH stacks are rare in production despite strong individual component implementations.
+Ferrum is an integrated, on-premises-first runtime that composes a broad set of
+GA4GH APIs — TRS, DRS, WES, TES, htsget, Beacon, Passports, and Crypt4GH —
+behind a unified Rust gateway with shared authentication. Synaptic Four built
+Ferrum because cross-service, reproducible GA4GH stacks are rare in production
+despite strong individual component implementations.
 
-This report is intended for data architects, genomics platform engineers, and standards implementers evaluating integrated GA4GH infrastructure. Principal contributions include: (1) a documented architecture for selective deployment of GA4GH services; (2) Crypt4GH integration at the DRS layer with O(1) header re-wrapping; (3) multi-engine WES execution via Cromwell, Nextflow, CWL, and Snakemake; (4) continuous cross-service validation through HelixTest; and (5) reproducible benchmark artefacts from the Ferrum GA4GH Demo.
+This report is intended for data architects, genomics platform engineers, and
+standards implementers evaluating integrated GA4GH infrastructure. Principal
+contributions include:
 
-Benchmark scope is intentionally modest—small synthetic-style genomic slices with stated repetition counts. Results are a technical conformance and performance signal, not official GA4GH certification.
+1. A documented architecture for selective deployment of GA4GH services.
+2. Crypt4GH integration at the DRS layer with O(1) header re-wrapping.
+3. Multi-engine WES execution via Cromwell, Nextflow, CWL, and Snakemake.
+4. Continuous cross-service validation through HelixTest.
+5. Reproducible benchmark artefacts from the Ferrum GA4GH Demo.
+
+Benchmark scope is intentionally modest — small synthetic-style genomic slices
+with stated repetition counts. Results are a technical conformance and
+performance signal, not official GA4GH certification.
+
+---
 
 # Introduction
 
-The Global Alliance for Genomics and Health (GA4GH) defines interoperable APIs for genomic data discovery, access, and compute [@ga4gh2024framework]. Research organisations, clinical laboratories, and national infrastructures increasingly require implementations that exercise multiple standards together in real pipelines—not isolated API endpoints.
+The Global Alliance for Genomics and Health (GA4GH) defines interoperable APIs
+for genomic data discovery, access, and compute [@ga4gh2024framework]. Research
+organisations, clinical laboratories, and national infrastructures increasingly
+require implementations that exercise multiple standards together in real
+pipelines — not isolated API endpoints.
 
-This report documents the Ferrum platform architecture, implementation choices, validation methodology, and deployment patterns. It supersedes the shorter web overview at [synapticfour.com](https://synapticfour.com/ferrum-white-paper) as the canonical technical source for Ferrum architecture (identifier SF-TR-2026-001).
+This report documents the Ferrum platform architecture, implementation choices,
+validation methodology, and deployment patterns. It supersedes the shorter web
+overview at [synapticfour.com/ferrum-white-paper](https://synapticfour.com/ferrum-white-paper)
+as the canonical technical source for Ferrum architecture (identifier SF-TR-2026-001).
 
-**Audience:** Bioinformaticians, research software engineers, data architects, infrastructure teams, and GA4GH implementers.
+**Audience:** Bioinformaticians, research software engineers, data architects,
+infrastructure teams, and GA4GH implementers.
 
-**Scope:** Architecture, integration patterns, validation, and benchmark methodology. Operational runbooks for specific customer deployments are out of scope.
+**Scope:** Architecture, integration patterns, validation, and benchmark
+methodology. Operational runbooks for specific customer deployments are out of
+scope.
 
 # Background
 
-## GA4GH service landscape
+## GA4GH Service Landscape
 
-GA4GH specifies APIs including:
+GA4GH specifies APIs that together cover the full genomic data lifecycle — from
+object storage and access through workflow execution to variant discovery and
+authorisation. @tbl-ga4gh-apis summarises the services addressed in Ferrum.
 
 | API | Purpose |
-|-----|---------|
+|:---|:---|
 | **TRS** | Tool Registry Service — workflow and tool descriptors |
 | **DRS** | Data Repository Service — object storage and access |
 | **WES** | Workflow Execution Service — workflow run management |
 | **TES** | Task Execution Service — compute task dispatch |
-| **htsget** | Partial read retrieval from sequencing files |
+| **htsget** | Partial read retrieval from BAM/CRAM/VCF sequencing files |
 | **Beacon** | Variant existence queries |
-| **Passports** | Authorisation and data access policies |
-| **Crypt4GH** | Encrypted genomics data exchange [@crypt4gh2020] |
+| **Passports** | Authorisation and data access policies (OIDC-based) |
+| **Crypt4GH** | Encrypted genomics data exchange; O(1) header re-wrapping [@crypt4gh2020] |
 
-Production systems often implement subsets. DRS object access patterns follow the GA4GH DRS specification [@drs2021v1]. Cross-service stacks with unified authentication, shared metadata, and continuous conformance testing remain uncommon.
+: GA4GH APIs implemented in Ferrum. {#tbl-ga4gh-apis tbl-colwidths="[18,82]"}
 
-## Synaptic Four context
+Production systems often implement subsets. DRS object access patterns follow
+the GA4GH DRS specification v1 [@drs2021v1]. Cross-service stacks with unified
+authentication, shared metadata, and continuous conformance testing remain
+uncommon.
 
-Synaptic Four is a Stuttgart-based consultancy specialising in bioinformatics, federated data infrastructure, and GA4GH-oriented platform engineering. Ferrum serves as both a deployable platform and a public demonstration of engineering practice: precise, documented, and test-driven.
+## Synaptic Four Context
+
+Synaptic Four is a Stuttgart-based consultancy specialising in bioinformatics,
+federated data infrastructure, and GA4GH-oriented platform engineering. Ferrum
+serves as both a deployable platform and a public demonstration of engineering
+practice: precise, documented, and test-driven.
 
 # Problem Statement
 
 Research and clinical genomics teams need:
 
-1. **Integrated GA4GH services** that work together in end-to-end pipelines (TRS → DRS → WES → TES).
-2. **On-premises-first deployment** with selective service activation—not mandatory cloud dependency.
-3. **Encryption at rest and per-requester delivery** via Crypt4GH [@crypt4gh2020] without breaking DRS access patterns [@drs2021v1].
-4. **Reproducible validation** that any operator can run independently [@helixtest2026].
-5. **Honest performance claims** with documented dataset scope and limitations, aligned with FAIR documentation practice [@wilkinson2016fair].
+1. **Integrated GA4GH services** that work together in end-to-end pipelines
+   (TRS → DRS → WES → TES).
+2. **On-premises-first deployment** with selective service activation — no
+   mandatory cloud dependency.
+3. **Encryption at rest and per-requester delivery** via Crypt4GH
+   [@crypt4gh2020] without breaking DRS access patterns [@drs2021v1].
+4. **Reproducible validation** that any operator can run independently
+   [@helixtest2026].
+5. **Honest performance claims** with documented dataset scope and limitations,
+   aligned with FAIR data practice [@wilkinson2016fair].
 
-Existing component implementations (TESK, Funnel, cwl-WES, WESkit, GA4GH Starter Kit pieces, Galaxy integrations) address individual standards well. The gap is a focused integration point combining TRS + DRS + WES + TES + htsget + Beacon + Passports + Crypt4GH in one runtime with a unified gateway and continuous cross-service tests.
+Existing component implementations — TESK, Funnel, cwl-WES, WESkit, GA4GH
+Starter Kit pieces, Galaxy integrations — address individual standards well. The
+gap is a focused integration point combining TRS + DRS + WES + TES + htsget +
+Beacon + Passports + Crypt4GH in one runtime with a unified gateway and
+continuous cross-service tests.
 
 # Related Work
 
 Strong open-source implementations exist across the GA4GH ecosystem:
 
-- **TESK / Funnel** — TES implementations for Kubernetes and batch systems.
+- **TESK / Funnel** — TES implementations for Kubernetes and HPC batch systems.
 - **cwl-WES / WESkit** — WES backends for CWL workflows.
 - **GA4GH Starter Kit** — Reference implementations for individual APIs.
-- **Galaxy** — Workflow platform with GA4GH integrations.
+- **Galaxy** — Workflow platform with broad GA4GH integrations.
 
-Ferrum does not replace these projects. It targets organisations needing a composable, on-premises-first runtime that exercises the standards together. Ferrum Lab Kit (BUSL-1.1) provides an opinionated on-ramp for laboratories, ELIXIR node candidates, and GDI-style footprints.
+Ferrum does not replace these projects. It targets organisations needing a
+composable, on-premises-first runtime that exercises the standards together.
+Ferrum Lab Kit (BUSL-1.1) provides an opinionated on-ramp for laboratories,
+ELIXIR node candidates, and GDI-style footprints.
 
-Independent validation is provided by **HelixTest** (Apache-2.0) [@helixtest2026], maintained by Synaptic Four and reusable against any GA4GH-compatible platform.
+Independent validation is provided by **HelixTest** (Apache-2.0)
+[@helixtest2026], maintained by Synaptic Four and reusable against any
+GA4GH-compatible platform.
 
 # System Architecture
 
-## High-level design
+## High-Level Design
 
-Services are composed behind a single **ferrum-gateway** (Rust, async) [@ferrum2026]. Metadata resides in PostgreSQL; objects in S3-compatible storage (MinIO, cloud S3, POSIX, OpenDAL-backed backends).
+Services are composed behind a single **ferrum-gateway** (Rust, async Tokio)
+[@ferrum2026]. Metadata resides in PostgreSQL; objects in S3-compatible storage
+(MinIO, cloud S3, POSIX, OpenDAL-backed backends). The gateway routes requests
+to enabled GA4GH services; operators run only the services required for their
+footprint.
 
-::: {.content-visible when-format="pdf"}
-
-**Figure — Ferrum GA4GH demo data plane** (logical flow; see Ferrum GA4GH Demo [@ferrum_demo2026]).
-
-| Step | Component | Action |
-|------|-----------|--------|
-| 1 | Client (`demo/run.sh`) | Multipart ingest to DRS |
-| 2 | ferrum-gateway | Routes GA4GH API requests |
-| 3 | DRS | Ingest + object stream (`/ingest`, `/objects`) |
-| 4 | TRS | Tool descriptor resolution (`/tools`) |
-| 5 | WES | Workflow run submission (`/runs`) |
-| 6 | TES | Task dispatch (`/tasks`) → Cromwell or Nextflow |
-| 7 | Execution | GATK container via Docker socket |
-| 8 | Storage | PostgreSQL metadata + MinIO objects |
-
-:::
-
-::: {.content-visible when-format="html"}
+@fig-dataplane illustrates the logical data-plane flow in the Ferrum GA4GH Demo
+stack.
 
 ```{mermaid}
-%%| fig-cap: Ferrum GA4GH demo data plane (Ferrum GA4GH Demo)
-%%| fig-width: 6.5
-%%| fig-height: 5.5
-%%| fig-format: png
+%%| label: fig-dataplane
+%%| fig-cap: "Ferrum GA4GH Demo data plane — logical flow. Arrows represent the direction of API calls. Numbers correspond to the walk-through in @sec-dataplane-walkthrough."
+%%| fig-width: 7
+%%| fig-height: 6
 flowchart TB
-  subgraph Client
-    R[demo/run.sh]
+  subgraph Client["Client"]
+    R["demo/run.sh"]
   end
-  subgraph FerrumStack[Ferrum Docker Compose]
-    G[ferrum-gateway]
-    DRS[DRS /ingest + /objects]
-    TRS[TRS /tools]
-    WES[WES /runs]
-    TES[TES /tasks]
-    PG[(Postgres)]
-    S3[(MinIO)]
+
+  subgraph FerrumStack["Ferrum (Docker Compose)"]
+    direction TB
+    G["ferrum-gateway\n(Rust · async)"]
+
+    subgraph Services["GA4GH Services"]
+      direction LR
+      DRS["DRS\n/ingest · /objects · /stream"]
+      TRS["TRS\n/tools"]
+      WES["WES\n/runs"]
+      TES["TES\n/tasks"]
+    end
+
+    subgraph Storage["Storage"]
+      direction LR
+      PG[("PostgreSQL\nmetadata")]
+      S3[("MinIO\nobject store")]
+    end
   end
-  subgraph Exec[TES execution]
-    C[Cromwell or Nextflow]
-    GK[GATK container]
+
+  subgraph Exec["TES Execution"]
+    direction LR
+    C["Cromwell · Nextflow\nCWL · Snakemake"]
+    GK["GATK container\n(docker.sock)"]
   end
-  R -->|multipart ingest| DRS
-  R -->|Dockstore TRS| TRS
-  R -->|POST /runs| WES
-  WES -->|POST /tasks| TES
-  TES -->|Docker API| C
-  C -->|docker.sock| GK
-  DRS --> PG
-  DRS --> S3
+
+  R -->|"① multipart ingest"| G
   G --> DRS
+  G --> TRS
   G --> WES
   G --> TES
+
+  R -->|"② Dockstore TRS lookup"| TRS
+  R -->|"③ POST /runs"| WES
+  WES -->|"④ POST /tasks"| TES
+  TES -->|"⑤ Docker API"| C
+  C -->|"⑥ docker.sock"| GK
+
+  DRS --- PG
+  DRS --- S3
 ```
 
-:::
+## Gateway and Service Composition
 
-## Gateway and service composition
+The gateway authenticates every incoming request and routes it to the
+appropriate GA4GH service. Deployment is **selective**: operators enable only
+the services their footprint requires via Docker Compose profiles and feature
+flags. This limits attack surface and resource consumption.
 
-The gateway routes requests to enabled GA4GH services. Deployment is **selective**: operators run only the services required for their footprint. Feature flags and compose profiles control which APIs are active.
+## Data Plane Walk-Through {#sec-dataplane-walkthrough}
 
-## Data plane
+A full demonstration run proceeds in eight steps:
 
-1. **Ingestion** — `POST /ga4gh/drs/v1/ingest/file` stores objects in S3-compatible backends with metadata in PostgreSQL.
-2. **Access** — `GET /ga4gh/drs/v1/objects/{id}/stream` delivers object bytes; Crypt4GH profiles support at-rest encryption and optional per-requester re-wrapping.
-3. **Workflow execution** — WES submits runs; TES dispatches to Cromwell (WDL), Nextflow, CWL, or Snakemake backends.
-4. **Tool resolution** — TRS caches workflow descriptors (including Dockstore `ga4gh/trs/v2` integration in the demo stack).
+1. **Ingest** — `POST /ga4gh/drs/v1/ingest/file` submits objects as multipart
+   form data. The DRS service stores bytes in the S3-compatible backend and
+   writes metadata to PostgreSQL.
+2. **Gateway routing** — ferrum-gateway authenticates the request and dispatches
+   to the target service.
+3. **Object access** — `GET /ga4gh/drs/v1/objects/{id}/stream` delivers bytes;
+   Crypt4GH profiles optionally encrypt at rest and re-wrap headers
+   per-requester.
+4. **Tool resolution** — TRS resolves workflow and tool descriptors, including
+   Dockstore `ga4gh/trs/v2` integration.
+5. **Workflow execution** — WES receives `POST /runs` and submits a workflow
+   run.
+6. **Task dispatch** — TES dispatches compute tasks to the configured engine
+   (Cromwell, Nextflow, CWL, Snakemake).
+7. **Container execution** — The engine invokes GATK via the Docker socket.
+8. **Result storage** — Outputs are written to the object store; benchmark
+   artefacts are emitted to `results/`.
 
-## Crypt4GH integration
+## Crypt4GH Integration
 
-Crypt4GH is integrated at the DRS layer:
+Crypt4GH is integrated at the DRS layer with three operational modes:
 
-- **At-rest encryption** — Objects ingested with `encrypt=true` are stored encrypted; server decrypts on `/stream`.
-- **O(1) header re-wrapping** — Per-requester delivery via `X-Crypt4GH-Public-Key` without re-encrypting entire objects.
-- **Passport auth** — Gateway re-wrap operations require Passport/OIDC-style authentication in stock Ferrum.
+- **At-rest encryption** — Objects ingested with `encrypt=true` are stored
+  encrypted; ferrum-gateway decrypts transparently on `/stream`.
+- **O(1) header re-wrapping** — Per-requester delivery via
+  `X-Crypt4GH-Public-Key` rewrites only the 64-byte Crypt4GH header; the
+  encrypted body is never re-processed.
+- **Passport-gated re-wrap** — Re-wrap operations require Passport/OIDC-style
+  authentication in stock Ferrum, preventing unauthorised key substitution.
 
 # Implementation
 
-## Technology stack
+## Technology Stack
+
+@tbl-tech-stack lists the primary technologies used in Ferrum.
 
 | Component | Technology |
-|-----------|------------|
-| Gateway | Rust (async) |
-| Metadata | PostgreSQL |
-| Object storage | MinIO, S3, POSIX, OpenDAL |
-| Workflow engines | Cromwell (WDL), Nextflow, CWL, Snakemake |
-| HPC schedulers | SLURM, LSF (on-premises) |
-| Authentication | Keycloak / OIDC (Passports) |
+|:---|:---|
+| Gateway | Rust (async Tokio) |
+| Metadata store | PostgreSQL |
+| Object storage | MinIO · AWS S3 · POSIX · OpenDAL backends |
+| Workflow engines | Cromwell (WDL) · Nextflow · CWL · Snakemake |
+| HPC schedulers | SLURM · LSF (on-premises) |
+| Authentication | Keycloak / OIDC (GA4GH Passports) |
 
-## WES → TES execution
+: Ferrum technology stack. {#tbl-tech-stack tbl-colwidths="[28,72]"}
 
-WES backends route workflow runs to TES with engine-specific launch configurations:
+## WES → TES Execution
+
+WES backends route workflow runs to TES with engine-specific launch
+configurations:
 
 - **WDL** — Cromwell via TES Docker backend with host-mounted work directories.
-- **Nextflow** — `nextflow run` with Docker enabled; NF 24+ configuration patterns.
+- **Nextflow** — `nextflow run` with Docker enabled; NF 24+ configuration
+  patterns.
 - **CWL / Snakemake** — Routed via TES with appropriate container backends.
 
-Environment variables control work directory paths, Docker socket mounting, and executor images. See the [Ferrum TES Docker Backend documentation](https://github.com/SynapticFour/Ferrum/blob/main/docs/TES-DOCKER-BACKEND.md).
+Environment variables control work directory paths, Docker socket mounting, and
+executor images. Full reference:
+[Ferrum TES Docker Backend documentation](https://github.com/SynapticFour/Ferrum/blob/main/docs/TES-DOCKER-BACKEND.md).
 
 ## Ferrum GA4GH Demo
 
-The [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo) (Apache-2.0) [@ferrum_demo2026] provides a reproducible end-to-end stack:
+The [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo)
+(Apache-2.0) [@ferrum_demo2026] provides a reproducible end-to-end stack:
 
-- GIAB-style synthetic subset (GRCh37 chr22 window)
-- DRS micro-benchmarks (`scripts/drs_micro_benchmark.py`)
-- Macro comparison: plain vs Crypt4GH-at-rest ingest
-- hap.py metrics for scientific equivalence validation
-- Machine-readable artefacts in `results/` (benchmark.json, drs_micro.json, engine_compare.json)
+- **Dataset** — GIAB-style synthetic subset; GRCh37 chr22:1700–2300 window for
+  controlled, fast iteration.
+- **DRS micro-benchmarks** — `scripts/drs_micro_benchmark.py`; object ingest
+  and `/stream` latency.
+- **Macro comparison** — plain vs Crypt4GH-at-rest ingest, full pipeline
+  end-to-end.
+- **Scientific validation** — hap.py precision / recall / F1 metrics confirming
+  genomic equivalence.
+- **Machine-readable artefacts** — `benchmark.json`, `drs_micro.json`,
+  `engine_compare.json` in `results/`.
 
 # Deployment
 
-## Selective service deployment
+## Selective Service Deployment
 
-Operators enable only required GA4GH services. Ferrum Lab Kit provides an opinionated compose stack for laboratories and ELIXIR node candidates.
+Operators activate only the GA4GH services their use case requires. Ferrum Lab
+Kit (BUSL-1.1) provides an opinionated Docker Compose stack designed as an
+on-ramp for:
 
-## Resource planning (demo reference)
+- Research and clinical laboratories.
+- ELIXIR node candidates.
+- GDI-style national infrastructure footprints.
+
+## Resource Planning
+
+@tbl-resources gives indicative resource requirements based on the demo stack.
 
 | Profile | RAM | Disk | Notes |
-|---------|-----|------|-------|
+|:---|:---|:---|:---|
 | Demo subset | 8–12 GB | ~5–15 GB | Synthetic GIAB-style slice |
-| Macro + Crypt4GH | same | + encrypted objects | ~2× pipeline time |
-| Production WGS | 32–64 GB+ | 200 GB–1 TB+ | Not demonstrated in demo |
+| Macro + Crypt4GH | 8–12 GB | + encrypted objects | ~2× pipeline time vs plain |
+| Production WGS | 32–64 GB+ | 200 GB–1 TB+ | Not demonstrated; estimate only |
+
+: Demo reference resource planning. {#tbl-resources}
 
 ## Reproducibility
 
-Demo repositories pin versions, document environment variables, and emit machine-readable benchmark artefacts. `./run` scripts orchestrate compose lifecycle with optional `--no-reset` for faster iteration.
+All demo repositories pin software versions, document environment variables
+exhaustively, and emit machine-readable benchmark artefacts alongside each run.
+`./run` scripts manage the full Docker Compose lifecycle; `--no-reset` enables
+faster iteration by skipping volume teardown between runs.
 
 # Security Considerations
 
-- **Authentication** — Passports/OIDC via Keycloak; gateway enforces auth on sensitive operations including Crypt4GH re-wrap.
-- **Encryption** — Crypt4GH at-rest and in-transit profiles; keys managed per deployment.
-- **Least privilege** — Selective service deployment limits attack surface.
-- **Audit** — HelixTest exercises auth flows in CI; production audit logging is deployment-specific.
+- **Authentication** — Passports/OIDC via Keycloak; ferrum-gateway enforces
+  authentication on all sensitive operations including Crypt4GH re-wrap.
+- **Encryption** — Crypt4GH at-rest and in-transit profiles; keys are managed
+  outside the gateway, per deployment.
+- **Least privilege** — Selective service deployment minimises the exposed API
+  surface area.
+- **Audit** — HelixTest exercises authentication flows in CI; production audit
+  logging is deployment-specific and out of scope here.
 
-This report does not constitute a formal security audit. Deployment-specific threat models should be developed for regulated environments.
+::: {.callout-important}
+This report does not constitute a formal security audit. Deployment-specific
+threat models should be developed for any regulated or clinical environment.
+:::
 
 # Performance Considerations
 
-Benchmarks from the Ferrum GA4GH Demo (2026-05-08 run, WDL engine):
+Benchmarks are drawn from the Ferrum GA4GH Demo run of 2026-05-08 using the WDL
+engine (Cromwell). All metrics reflect the synthetic GIAB-style chr22 subset
+described in @sec-demo.
 
 | Metric | Value |
-|--------|-------|
-| Pipeline wall time | 199 s (WDL); 30 s (Nextflow, separate pass) |
-| DRS `/stream` plain median | ~4.5 ms (n = 3) |
+|:---|:---|
+| Pipeline wall time — WDL / Cromwell | 199 s |
+| Pipeline wall time — Nextflow | 30 s (separate pass) |
+| DRS `/stream` plain — median latency | ~4.5 ms (n = 3) |
 | hap.py precision / recall / F1 | 1.0 / 1.0 / 1.0 |
-| Input dataset | Synthetic subset, chr22:1700–2300 |
-| Total ingest size | ~5.4 KiB (six objects) |
+| Input dataset | Synthetic subset · chr22:1700–2300 (GRCh37) |
+| Total ingest size | ~5.4 KiB (six DRS objects) |
 
-**Limitations:** Small synthetic slices only. Medians based on n = 3 repetitions. Cromwell vs Nextflow times are end-to-end per pass (ingest, DRS micro-bench, WES, hap.py), not GATK-only. Results should not be extrapolated to whole-genome production workloads without independent measurement.
+: Benchmark results — Ferrum GA4GH Demo, 2026-05-08, WDL engine. {#tbl-benchmarks}
+
+::: {.callout-warning}
+**Limitations.** Medians based on n = 3 repetitions over small synthetic slices.
+Cromwell vs Nextflow times are full end-to-end per pass (ingest + DRS micro-bench
++ WES + hap.py), not GATK-only execution. Results must not be extrapolated to
+whole-genome production workloads without independent measurement at scale.
+:::
 
 # Limitations
 
-1. **Benchmark scope** — Demo uses small synthetic genomic slices, not production-scale WGS.
-2. **Certification** — HelixTest results are a technical signal, not official GA4GH certification.
-3. **Licensing** — Ferrum core is BUSL-1.1; HelixTest and Ferrum GA4GH Demo are Apache-2.0. Licensing terms vary by repository.
-4. **Cloud-native features** — Ferrum prioritises on-premises deployment; managed-cloud patterns are not the primary focus.
-5. **Single-vendor auth** — Stock demo uses Keycloak; other IdP integrations are deployment-specific.
+1. **Benchmark scope** — Demo uses small synthetic genomic slices, not
+   production-scale WGS. Larger GIAB subsets are planned (see @sec-future).
+2. **Certification** — HelixTest results are a technical conformance signal, not
+   official GA4GH certification.
+3. **Licensing** — Ferrum core is BUSL-1.1; HelixTest and Ferrum GA4GH Demo are
+   Apache-2.0. Licensing terms vary by repository; consult each repository's
+   `LICENSE` file.
+4. **Cloud-native features** — Ferrum prioritises on-premises deployment;
+   managed-cloud patterns are not the primary focus.
+5. **Single-vendor auth** — Stock demo uses Keycloak; other IdP integrations are
+   deployment-specific.
 
-# Future Work
+# Future Work {#sec-future}
 
-- Expand benchmark coverage to larger GIAB subsets with published dataset profiles.
-- Upstream gateway patches from demo overlay (TES backend selection, work directory routing).
-- Additional WES engine profiles and HPC scheduler integrations.
-- Federation patterns with Mycelium data infrastructure (see planned SF-TR-2026-002).
+- Expand benchmark coverage to larger GIAB subsets with published dataset
+  profiles and extended repetition counts.
+- Upstream gateway patches from the demo overlay (TES backend selection, work
+  directory routing).
+- Additional WES engine profiles and HPC scheduler integrations (PBS, OAR).
+- Federation patterns with Mycelium data infrastructure (see planned
+  SF-TR-2026-002).
 - Formal security audit for regulated clinical deployment footprints.
 
 # Conclusion
 
-A small team can deliver a unified GA4GH-oriented runtime when standards, tests, and honest scope are treated as first-class engineering concerns. Ferrum combines broad API coverage, selective deployment, Crypt4GH integration, and multi-engine execution in one composable runtime. HelixTest and the Ferrum GA4GH Demo make architectural claims independently verifiable.
+A small team can deliver a unified GA4GH-oriented runtime when standards, tests,
+and honest scope are treated as first-class engineering concerns. Ferrum combines
+broad API coverage, selective deployment, Crypt4GH integration, and multi-engine
+execution in one composable runtime. HelixTest and the Ferrum GA4GH Demo make
+architectural claims independently verifiable.
 
-Synaptic Four welcomes collaboration, deployment partnerships, and research contact.
+Synaptic Four welcomes collaboration, deployment partnerships, and research
+contact at [contact@synapticfour.com](mailto:contact@synapticfour.com).
 
 # Acknowledgements {.unnumbered}
 
-The GA4GH community and contributors to TESK, Funnel, cwl-WES, WESkit, the GA4GH Starter Kit, Galaxy, and related projects. GIAB reference materials for benchmark subsets. Open-source maintainers of Rust, PostgreSQL, MinIO, Cromwell, Nextflow, and GATK.
+The GA4GH community and contributors to TESK, Funnel, cwl-WES, WESkit, the
+GA4GH Starter Kit, Galaxy, and related projects. GIAB reference materials for
+benchmark subsets. Open-source maintainers of Rust, PostgreSQL, MinIO, Cromwell,
+Nextflow, and GATK.
 
 # References {.unnumbered}
 
@@ -297,33 +517,50 @@ The GA4GH community and contributors to TESK, Funnel, cwl-WES, WESkit, the GA4GH
 
 # Appendices {.unnumbered}
 
-## Appendix A: Related repositories
+## Appendix A — Related Repositories {.unnumbered}
 
 | Repository | License | Role |
-|------------|---------|------|
-| [Ferrum](https://github.com/SynapticFour/Ferrum) | BUSL-1.1 | Core GA4GH runtime |
-| [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo) | Apache-2.0 | Reproducible benchmarks |
-| [HelixTest](https://github.com/SynapticFour/HelixTest) | Apache-2.0 | Conformance test suite |
-| [Ferrum Lab Kit](https://github.com/SynapticFour/Ferrum-Lab-Kit) | BUSL-1.1 | Lab deployment on-ramp |
+|:---|:---|:---|
+| [Ferrum](https://github.com/SynapticFour/Ferrum) | BUSL-1.1 | Core GA4GH runtime (gateway + services) |
+| [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo) | Apache-2.0 | Reproducible end-to-end benchmark stack |
+| [HelixTest](https://github.com/SynapticFour/HelixTest) | Apache-2.0 | Independent GA4GH conformance test suite |
+| [Ferrum Lab Kit](https://github.com/SynapticFour/Ferrum-Lab-Kit) | BUSL-1.1 | Opinionated lab / ELIXIR node on-ramp |
 
-## Appendix B: Glossary
+: Related repositories and licenses. {#tbl-repos}
+
+## Appendix B — Glossary {.unnumbered}
 
 | Term | Definition |
-|------|------------|
-| DRS | Data Repository Service (GA4GH) |
-| WES | Workflow Execution Service (GA4GH) |
-| TES | Task Execution Service (GA4GH) |
-| TRS | Tool Registry Service (GA4GH) |
-| Crypt4GH | Encrypted genomics file format |
-| HelixTest | Independent GA4GH conformance test suite |
+|:---|:---|
+| DRS | Data Repository Service (GA4GH v1) |
+| WES | Workflow Execution Service (GA4GH v1) |
+| TES | Task Execution Service (GA4GH v1) |
+| TRS | Tool Registry Service (GA4GH v2) |
+| htsget | HTTP-based protocol for partial retrieval from BAM/CRAM/VCF files |
+| Crypt4GH | GA4GH encrypted genomics file format; supports O(1) header re-wrapping |
+| HelixTest | Independent GA4GH conformance test suite (Apache-2.0, Synaptic Four) |
+| GIAB | Genome in a Bottle — NIST reference material used for benchmark subsets |
+| BUSL-1.1 | Business Source License 1.1 — converts to Apache-2.0 after change date |
+| OIDC | OpenID Connect — identity layer used for GA4GH Passports |
+| OpenDAL | Apache OpenDAL — unified data access layer supporting S3, POSIX, and more |
 
-## Appendix C: Change Log
+: Glossary of terms and abbreviations. {#tbl-glossary}
+
+## Appendix C — Change Log {.unnumbered}
 
 | Version | Date | Summary |
-|---------|------|---------|
+|:---|:---|:---|
 | 1.0.0 | 2026-06-09 | Initial release; migrated from Ferrum white paper web content |
 | 1.0.1 | 2026-06-09 | PDF layout fixes; inline citations; PDF-safe architecture figure |
 
-## Appendix D: Relationship to web white paper
+: Document change log. {#tbl-changelog}
 
-The Ferrum white paper at [synapticfour.com/publications](https://synapticfour.com/publications) provides a shorter overview with PDF downloads (EN/DE). This technical report (SF-TR-2026-001) is the canonical, version-controlled source. Future revisions will be released via GitHub tags and archived on Zenodo with a DOI.
+## Appendix D — Relationship to Web White Paper {.unnumbered}
+
+The Ferrum white paper at
+[synapticfour.com/publications](https://synapticfour.com/publications) provides
+a shorter overview with PDF downloads (EN/DE). This technical report
+(SF-TR-2026-001) is the canonical, version-controlled source for Ferrum
+architecture. Future revisions will be released via GitHub tags and archived on
+Zenodo under the concept DOI `10.5281/zenodo.20612210`, which always resolves to
+the latest version.
