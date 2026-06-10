@@ -107,10 +107,23 @@ else
   echo "Draft record id: ${DRAFT_ID}"
   for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")
-    curl -fsS -X POST "${FILES_URL}" \
+    FILES_LIST=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
+      -H "Authorization: Bearer ${TOKEN}")
+    EXISTING_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
+      '.entries[]? | select(.key==$fn) | .links.self // empty' | head -1)
+    if [ -n "$EXISTING_URL" ] && [ "$EXISTING_URL" != "null" ]; then
+      echo "Removing existing draft file: ${asset}"
+      curl -fsS -X DELETE "$EXISTING_URL" -H "Authorization: Bearer ${TOKEN}" || true
+    fi
+    HTTP=$(curl -sS -o /tmp/zenodo-file-post.json -w '%{http_code}' -X POST "${FILES_URL}" \
       -H "Authorization: Bearer ${TOKEN}" \
       -H "Content-Type: application/json" \
-      -d "$(jq -n --arg fn "$asset" '{key: $fn}')"
+      -d "$(jq -n --arg fn "$asset" '{key: $fn}')")
+    if [ "$HTTP" -ge 400 ]; then
+      echo "ERROR: Zenodo file register failed HTTP ${HTTP} for ${asset}" >&2
+      cat /tmp/zenodo-file-post.json >&2 || true
+      exit 1
+    fi
     FILES_LIST=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
       -H "Authorization: Bearer ${TOKEN}")
     UPLOAD_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
