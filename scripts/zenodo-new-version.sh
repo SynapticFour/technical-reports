@@ -19,9 +19,21 @@ RELEASE_TAG="${2:?Release tag required}"
 ZENODO_RECORD_ID="${3:?Zenodo record id required (latest published version)}"
 
 ZENODO_API="${ZENODO_API:-https://zenodo.org/api}"
+ZENODO_BASE="${ZENODO_API%/api}"
 TOKEN="${ZENODO_ACCESS_TOKEN:?Set ZENODO_ACCESS_TOKEN}"
 PUBLISH="${ZENODO_PUBLISH:-false}"
 REPO="${GITHUB_REPO:-SynapticFour/technical-reports}"
+
+resolve_zenodo_url() {
+  local url="$1"
+  if [[ "$url" == http* ]]; then
+    echo "$url"
+  elif [[ "$url" == /* ]]; then
+    echo "${ZENODO_BASE}${url}"
+  else
+    echo "${ZENODO_API}/${url}"
+  fi
+}
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PAPER="${ROOT}/reports/${REPORT_ID}/paper.qmd"
@@ -217,15 +229,35 @@ for asset_path in "$PDF_PATH" "$HTML_PATH"; do
       echo "$FILES_LIST" | jq . >&2 || true
       exit 1
     fi
+    UPLOAD_URL=$(resolve_zenodo_url "$UPLOAD_URL")
     HTTP=$(curl -sS -o /tmp/zenodo-upload-response.json -w '%{http_code}' -X PUT "$UPLOAD_URL" \
       -H "Authorization: Bearer ${TOKEN}" \
+      -H "Content-Type: application/octet-stream" \
       --upload-file "$asset_path")
     if [ "$HTTP" -ge 400 ]; then
       echo "ERROR: Zenodo file upload failed HTTP ${HTTP} for ${asset}" >&2
       cat /tmp/zenodo-upload-response.json >&2 || true
       exit 1
     fi
-    echo "Uploaded ${asset}"
+    FILES_LIST=$(curl -sS "$FILES_URL" -H "Authorization: Bearer ${TOKEN}")
+    COMMIT_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
+      '.entries[] | select(.key==$fn) | .links.commit // empty')
+    if [ -z "$COMMIT_URL" ] || [ "$COMMIT_URL" = "null" ]; then
+      echo "ERROR: commit URL not found for ${asset}" >&2
+      exit 1
+    fi
+    COMMIT_URL=$(resolve_zenodo_url "$COMMIT_URL")
+    HTTP=$(curl -sS -o /tmp/zenodo-commit-response.json -w '%{http_code}' -X POST "$COMMIT_URL" \
+      -H "Authorization: Bearer ${TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d '{}')
+    if [ "$HTTP" -ge 400 ]; then
+      echo "ERROR: Zenodo file commit failed HTTP ${HTTP} for ${asset}" >&2
+      cat /tmp/zenodo-commit-response.json >&2 || true
+      exit 1
+    fi
+    FILE_STATUS=$(jq -r '.status // empty' /tmp/zenodo-commit-response.json)
+    echo "Uploaded and committed ${asset} (status=${FILE_STATUS:-completed})"
   done
 
 echo ""

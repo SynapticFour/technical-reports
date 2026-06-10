@@ -1,0 +1,35 @@
+name: Zenodo Commit Draft Files
+
+# Finalize pending API file uploads so the draft can be published.
+on:
+  workflow_dispatch:
+    inputs:
+      zenodo_draft_id:
+        description: 'Zenodo draft record id (from deposit URL)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  commit-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Zenodo token configured
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+        run: |
+          if [ -z "${ZENODO_ACCESS_TOKEN}" ]; then
+            echo "::error::ZENODO_ACCESS_TOKEN repository secret is not set."
+            exit 1
+          fi
+
+      - name: Commit pending draft files
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+        run: |
+          chmod +x scripts/zenodo-commit-draft-files.sh
+          ./scripts/zenodo-commit-draft-files.sh "${{ inputs.zenodo_draft_id }}"
