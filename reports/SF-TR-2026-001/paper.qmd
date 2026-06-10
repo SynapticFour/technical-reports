@@ -42,16 +42,16 @@ abstract: |
 license: "CC BY 4.0"
 
 # DOI is assigned on Zenodo upload; set here once available
-doi: "10.5281/zenodo.20612210"
-zenodo: "https://zenodo.org/records/20612210"
+doi: "10.5281/zenodo.20628103"
+zenodo: "https://zenodo.org/records/20628103"
 github-release: "https://github.com/SynapticFour/Ferrum/releases"
 
 citation:
   type: report
   publisher: Synaptic Four
-  doi: "10.5281/zenodo.20612210"
-  url: "https://zenodo.org/records/20612210"
-  issued: 2026-06-09
+  doi: "10.5281/zenodo.20628103"
+  url: "https://zenodo.org/records/20628103"
+  issued: 2026-06-10
 
 bibliography: references.bib
 csl: ../../csl/ieee.csl   # IEEE numeric style; adjust path to repo root
@@ -116,7 +116,7 @@ format:
         \fancyhf{}
         \fancyhead[L]{\small\color{gray}Synaptic Four · SF-TR-2026-001}
         \fancyhead[R]{\small\color{ferrumteal}\textbf{TECHNICAL REPORT}}
-        \fancyfoot[L]{\small\color{gray}DOI: 10.5281/zenodo.20612210 · CC BY 4.0}
+        \fancyfoot[L]{\small\color{gray}DOI: 10.5281/zenodo.20628103 · CC BY 4.0}
         \fancyfoot[R]{\small\color{gray}Page \thepage\ of \pageref{LastPage}}
         \renewcommand{\headrulewidth}{0.4pt}
         \renewcommand{\footrulewidth}{0.4pt}
@@ -510,5 +510,5 @@ The Ferrum white paper at
 a shorter overview with PDF downloads (EN/DE). This technical report
 (SF-TR-2026-001) is the canonical, version-controlled source for Ferrum
 architecture. Future revisions will be released via GitHub tags and archived on
-Zenodo under the concept DOI `10.5281/zenodo.20612210`, which always resolves to
+Zenodo under the concept DOI `10.5281/zenodo.20612209`, which always resolves to
 the latest version.

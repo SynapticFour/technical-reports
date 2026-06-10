@@ -28,8 +28,8 @@ reports:
       - Ferrum
       - Crypt4GH
       - HelixTest
-    doi: "10.5281/zenodo.20612210"
-    zenodo: "https://zenodo.org/records/20612210"
+    doi: "10.5281/zenodo.20628103"
+    zenodo: "https://zenodo.org/records/20628103"
     github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-001-v1.0.3"
     website: "https://synapticfour.com/en/publications/sf-tr-2026-001"
     path: reports/SF-TR-2026-001

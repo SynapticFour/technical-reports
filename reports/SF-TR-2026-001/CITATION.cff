@@ -5,7 +5,7 @@ authors:
     affiliation: Synaptic Four
 message: "If you use this work, please cite using the DOI."
 type: report
-doi: 10.5281/zenodo.20612210
+doi: 10.5281/zenodo.20628103
 keywords:
   - GA4GH
   - genomics
@@ -16,5 +16,5 @@ keywords:
 license: CC-BY-4.0
 repository-code: 'https://github.com/SynapticFour/technical-reports/tree/main/reports/SF-TR-2026-001'
 url: 'https://synapticfour.com/publications/sf-tr-2026-001'
-version: 1.0.1
-date-released: '2026-06-09'
+version: 1.0.3
+date-released: '2026-06-10'
