@@ -30,7 +30,7 @@ on:
       zenodo_draft_id:
         description: 'Reuse open Zenodo draft id (leave empty to auto-detect)'
         required: false
-        default: '20625391'
+        default: ''
         type: string
       publish:
         description: 'Auto-publish on Zenodo (mint new version DOI immediately)'

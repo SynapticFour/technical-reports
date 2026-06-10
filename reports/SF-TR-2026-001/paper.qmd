@@ -12,7 +12,7 @@ date: "2026-06-09"
 date-format: "D MMMM YYYY"
 
 # Report metadata (custom fields — used by website templates)
-version: "1.0.1"
+version: "1.0.3"
 report-id: SF-TR-2026-001
 report-category: architecture
 series: "Synaptic Four Technical Reports"
@@ -547,6 +547,8 @@ Nextflow, and GATK.
 |:---|:---|:---|
 | 1.0.0 | 2026-06-09 | Initial release; migrated from Ferrum white paper web content |
 | 1.0.1 | 2026-06-09 | PDF layout fixes; inline citations; PDF-safe architecture figure |
+| 1.0.2 | 2026-06-10 | Expanded report content and bibliography (GitHub release only) |
+| 1.0.3 | 2026-06-10 | Architecture diagram scaled to A4 margins; Mermaid figure sizing fix |
 
 : Document change log. {#tbl-changelog}
 

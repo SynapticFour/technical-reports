@@ -13,8 +13,8 @@ reports:
     title: "Ferrum Architecture: A GA4GH-Native Genomics Platform"
     category: architecture
     status: published
-    version: "1.0.1"
-    date: "2026-06-09"
+    version: "1.0.3"
+    date: "2026-06-10"
     authors:
       - Synaptic Four
     abstract: >
@@ -30,7 +30,7 @@ reports:
       - HelixTest
     doi: "10.5281/zenodo.20612210"
     zenodo: "https://zenodo.org/records/20612210"
-    github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-001-v1.0.0"
+    github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-001-v1.0.3"
     website: "https://synapticfour.com/en/publications/sf-tr-2026-001"
     path: reports/SF-TR-2026-001
     formats:
