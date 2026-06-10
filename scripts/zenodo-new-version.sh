@@ -112,7 +112,31 @@ else
     DRAFT_LINK=$(echo "$PUBLISHED" | jq -r '.links.latest_draft // empty')
     if [ -n "$DRAFT_LINK" ] && [ "$DRAFT_LINK" != "null" ]; then
       echo "Reusing latest_draft from published record." >&2
-      NEW_VERSION=$(curl -fsS "$DRAFT_LINK" -H "Authorization: Bearer ${TOKEN}")
+      NEW_VERSION=$(curl -fsS "$DRAFT_LINK" -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{}')
+    fi
+    if [ -z "$(echo "$NEW_VERSION" | jq -r '.id // empty')" ]; then
+      echo "Searching open drafts for ${REPORT_ID}..." >&2
+      MATCHING_DRAFT_ID=$(curl -sS "${ZENODO_API}/deposit/depositions?status=draft&size=25" \
+        -H "Authorization: Bearer ${TOKEN}" \
+        | jq -r --arg rid "${REPORT_ID}" \
+          '.[]? | select((.metadata.title // "") | contains($rid)) | .id' | head -1)
+      if [ -n "${MATCHING_DRAFT_ID}" ]; then
+        echo "Reusing open draft id ${MATCHING_DRAFT_ID}." >&2
+        for draft_url in \
+          "${ZENODO_API}/records/${MATCHING_DRAFT_ID}/draft" \
+          "${ZENODO_API}/records/${MATCHING_DRAFT_ID}"; do
+          DRAFT_HTTP=$(curl -sS -o /tmp/zenodo-draft.json -w '%{http_code}' \
+            "$draft_url" -H "Authorization: Bearer ${TOKEN}")
+          if [ "$DRAFT_HTTP" -lt 400 ]; then
+            NEW_VERSION=$(cat /tmp/zenodo-draft.json)
+            break
+          fi
+        done
+        if [ -z "$(echo "$NEW_VERSION" | jq -r '.id // empty')" ]; then
+          NEW_VERSION=$(jq -n --arg id "${MATCHING_DRAFT_ID}" --arg api "${ZENODO_API}" \
+            '{id: $id, links: {self: ($api + "/records/" + $id + "/draft"), files: ($api + "/records/" + $id + "/draft/files")}}')
+        fi
+      fi
     fi
   fi
 fi
