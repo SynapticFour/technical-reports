@@ -57,12 +57,25 @@ download_release_asset() {
     echo "$dest"
     return 0
   fi
-  echo "ERROR: Could not download ${asset} from release ${RELEASE_TAG}" >&2
+  return 1
+}
+
+resolve_release_asset() {
+  local label="$1"
+  shift
+  local candidate path
+  for candidate in "$@"; do
+    if path=$(download_release_asset "${candidate}"); then
+      echo "$path"
+      return 0
+    fi
+  done
+  echo "ERROR: Could not download ${label} from release ${RELEASE_TAG} (tried: $*)" >&2
   exit 1
 }
 
-PDF_PATH=$(download_release_asset "${REPORT_ID}.pdf")
-HTML_PATH=$(download_release_asset "${REPORT_ID}.html")
+PDF_PATH=$(resolve_release_asset "PDF" "${REPORT_ID}.pdf" "paper.pdf")
+HTML_PATH=$(resolve_release_asset "HTML" "${REPORT_ID}.html" "paper.html")
 echo "Downloaded release assets:"
 echo "  ${PDF_PATH} ($(wc -c < "$PDF_PATH") bytes)"
 echo "  ${HTML_PATH} ($(wc -c < "$HTML_PATH") bytes)"

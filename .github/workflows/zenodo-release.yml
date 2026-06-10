@@ -82,7 +82,7 @@ jobs:
             RECORD_ID="${{ vars.ZENODO_RECORD_ID }}"
             echo "record_id=${RECORD_ID:-20612210}" >> "$GITHUB_OUTPUT"
             DRAFT_ID="${{ vars.ZENODO_DRAFT_ID }}"
-            echo "draft_id=${DRAFT_ID:-20625391}" >> "$GITHUB_OUTPUT"
+            echo "draft_id=${DRAFT_ID}" >> "$GITHUB_OUTPUT"
             echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
 
