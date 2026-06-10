@@ -375,7 +375,7 @@ Environment variables control work directory paths, Docker socket mounting, and
 executor images. Full reference:
 [Ferrum TES Docker Backend documentation](https://github.com/SynapticFour/Ferrum/blob/main/docs/TES-DOCKER-BACKEND.md).
 
-## Ferrum GA4GH Demo
+## Ferrum GA4GH Demo {#sec-demo}
 
 The [Ferrum GA4GH Demo](https://github.com/SynapticFour/Ferrum-GA4GH-Demo)
 (Apache-2.0) [@ferrum_demo2026] provides a reproducible end-to-end stack:
