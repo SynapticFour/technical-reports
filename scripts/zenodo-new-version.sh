@@ -111,11 +111,23 @@ else
       -H "Authorization: Bearer ${TOKEN}" \
       -H "Content-Type: application/json" \
       -d "$(jq -n --arg fn "$asset" '{key: $fn}')"
-    UPLOAD_URL=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
-      -H "Authorization: Bearer ${TOKEN}" | jq -r --arg fn "$asset" '.entries[] | select(.key==$fn) | .links.self')
-    curl -fsS -X PUT "${UPLOAD_URL}/content" \
+    FILES_LIST=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
+      -H "Authorization: Bearer ${TOKEN}")
+    UPLOAD_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
+      '.entries[] | select(.key==$fn) | .links.content // .links.self')
+    if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
+      echo "ERROR: file upload URL not found for ${asset}" >&2
+      echo "$FILES_LIST" | jq . >&2 || true
+      exit 1
+    fi
+    HTTP=$(curl -sS -o /tmp/zenodo-upload-response.json -w '%{http_code}' -X PUT "$UPLOAD_URL" \
       -H "Authorization: Bearer ${TOKEN}" \
-      --upload-file "$asset_path"
+      --upload-file "$asset_path")
+    if [ "$HTTP" -ge 400 ]; then
+      echo "ERROR: Zenodo file upload failed HTTP ${HTTP} for ${asset}" >&2
+      cat /tmp/zenodo-upload-response.json >&2 || true
+      exit 1
+    fi
     echo "Uploaded ${asset}"
   done
   curl -fsS -X PUT "${DRAFT_URL}" \

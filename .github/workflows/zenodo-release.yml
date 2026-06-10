@@ -43,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Use latest upload script (release tag may predate workflow fixes).
+          ref: main
 
       # secrets.* cannot be used in job-level `if:` — check inside a step instead.
       - name: Check Zenodo token configured
