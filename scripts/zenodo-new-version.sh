@@ -144,6 +144,29 @@ echo "Draft API: ${DRAFT_URL}"
 echo "Files API: ${FILES_URL}"
 echo "Draft record id: ${DRAFT_ID}"
 
+METADATA_JSON=$("${ROOT}/scripts/zenodo-metadata-json.sh" "${REPORT_ID}" "${ZENODO_RECORD_ID}" "${RELEASE_TAG}")
+echo "Updating Zenodo metadata (title, resource type, creators, publication date, description)..."
+META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_URL}" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d "${METADATA_JSON}")
+if [ "$META_HTTP" -ge 400 ]; then
+  echo "WARNING: Zenodo metadata update returned HTTP ${META_HTTP}" >&2
+  cat /tmp/zenodo-meta-response.json >&2 || true
+  echo "Retrying via /draft endpoint..." >&2
+  DRAFT_EDIT_URL="${ZENODO_API}/records/${DRAFT_ID}/draft"
+  META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_EDIT_URL}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${METADATA_JSON}")
+  if [ "$META_HTTP" -ge 400 ]; then
+    echo "ERROR: Zenodo metadata update failed HTTP ${META_HTTP}" >&2
+    cat /tmp/zenodo-meta-response.json >&2 || true
+    exit 1
+  fi
+fi
+echo "Metadata OK."
+
 for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")
     FILES_LIST=$(curl -sS "$FILES_URL" -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{"entries":[]}')
@@ -180,18 +203,6 @@ for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     fi
     echo "Uploaded ${asset}"
   done
-  META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_URL}" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    -H "Content-Type: application/json" \
-    -d "$(jq -n \
-      --arg v "v${VERSION}" \
-      --arg title "${TITLE} (${REPORT_ID})" \
-      --arg notes "Synaptic Four Technical Report Series. GitHub release: ${RELEASE_TAG}" \
-      '{metadata: {title: $title, version: $v, notes: $notes}}')")
-  if [ "$META_HTTP" -ge 400 ]; then
-    echo "WARNING: Zenodo metadata update returned HTTP ${META_HTTP} (files are uploaded; edit metadata in UI)." >&2
-    cat /tmp/zenodo-meta-response.json >&2 || true
-  fi
 
 echo ""
 echo "Zenodo draft ready: https://zenodo.org/deposit/${DRAFT_ID}"

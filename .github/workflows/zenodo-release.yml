@@ -101,7 +101,7 @@ jobs:
           ZENODO_PUBLISH: ${{ steps.vars.outputs.publish }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          chmod +x scripts/zenodo-new-version.sh
+          chmod +x scripts/zenodo-new-version.sh scripts/zenodo-metadata-json.sh
           ./scripts/zenodo-new-version.sh \
             "${{ steps.vars.outputs.report_id }}" \
             "${{ steps.vars.outputs.release_tag }}" \

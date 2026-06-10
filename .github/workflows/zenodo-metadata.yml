@@ -1,0 +1,62 @@
+name: Zenodo Metadata Fix
+
+# Patch required metadata fields on an existing Zenodo draft (no file re-upload).
+on:
+  workflow_dispatch:
+    inputs:
+      report_id:
+        description: 'Report ID'
+        required: true
+        default: SF-TR-2026-001
+        type: string
+      zenodo_draft_id:
+        description: 'Zenodo draft record id (from deposit URL)'
+        required: true
+        type: string
+      zenodo_record_id:
+        description: 'Parent published version record id'
+        required: true
+        default: '20612210'
+        type: string
+      release_tag:
+        description: 'GitHub release tag (for notes field)'
+        required: false
+        default: SF-TR-2026-001-v1.0.3
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  zenodo-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Zenodo token configured
+        id: token
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+        run: |
+          if [ -z "${ZENODO_ACCESS_TOKEN}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::error::ZENODO_ACCESS_TOKEN repository secret is not set."
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Install tools
+        if: steps.token.outputs.configured == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq jq curl
+
+      - name: Update Zenodo draft metadata
+        if: steps.token.outputs.configured == 'true'
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+        run: |
+          chmod +x scripts/zenodo-metadata-json.sh scripts/zenodo-update-draft-metadata.sh
+          ./scripts/zenodo-update-draft-metadata.sh \
+            "${{ inputs.report_id }}" \
+            "${{ inputs.zenodo_draft_id }}" \
+            "${{ inputs.zenodo_record_id }}" \
+            "${{ inputs.release_tag }}"
