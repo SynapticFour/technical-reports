@@ -121,13 +121,6 @@ format:
         \setlength{\headheight}{14pt}
 ---
 
-```{r}
-#| label: setup
-#| include: false
-# No R packages required for this report.
-# If you add computed tables later, load them here.
-```
-
 # Executive Summary {.unnumbered}
 
 Ferrum is an integrated, on-premises-first runtime that composes a broad set of

@@ -78,7 +78,8 @@ jobs:
         run: |
           tlmgr update --self --all || true
           tlmgr install booktabs longtable fancyhdr caption multirow enumitem \
-            graphicx adjustbox float placeins tabularx microtype wrapfig xcolor || true
+            graphicx adjustbox float placeins tabularx microtype wrapfig xcolor \
+            lastpage fancyhdr array || true
 
       - name: Render report
         working-directory: reports/${{ matrix.report }}
