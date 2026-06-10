@@ -67,50 +67,52 @@ echo "Downloaded release assets:"
 echo "  ${PDF_PATH} ($(wc -c < "$PDF_PATH") bytes)"
 echo "  ${HTML_PATH} ($(wc -c < "$HTML_PATH") bytes)"
 
-echo "Creating Zenodo version draft from record ${ZENODO_RECORD_ID}..."
+echo "Creating or reusing Zenodo version draft from record ${ZENODO_RECORD_ID}..."
 
-NEW_VERSION=$(curl -fsS -X POST "${ZENODO_API}/records/${ZENODO_RECORD_ID}/versions" \
+NEW_VERSION=""
+VERSION_HTTP=$(curl -sS -o /tmp/zenodo-version.json -w '%{http_code}' -X POST \
+  "${ZENODO_API}/records/${ZENODO_RECORD_ID}/versions" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json")
+if [ "$VERSION_HTTP" -lt 400 ]; then
+  NEW_VERSION=$(cat /tmp/zenodo-version.json)
+else
+  echo "POST /versions returned HTTP ${VERSION_HTTP} (often: an open draft already exists)." >&2
+  cat /tmp/zenodo-version.json >&2 2>/dev/null || true
+  if [ -n "${ZENODO_DRAFT_ID:-}" ]; then
+    echo "Reusing ZENODO_DRAFT_ID=${ZENODO_DRAFT_ID}" >&2
+    NEW_VERSION=$(curl -fsS "${ZENODO_API}/records/${ZENODO_DRAFT_ID}/draft" \
+      -H "Authorization: Bearer ${TOKEN}")
+  else
+    PUBLISHED=$(curl -sS "${ZENODO_API}/records/${ZENODO_RECORD_ID}" \
+      -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{}')
+    DRAFT_LINK=$(echo "$PUBLISHED" | jq -r '.links.latest_draft // empty')
+    if [ -n "$DRAFT_LINK" ] && [ "$DRAFT_LINK" != "null" ]; then
+      echo "Reusing latest_draft from published record." >&2
+      NEW_VERSION=$(curl -fsS "$DRAFT_LINK" -H "Authorization: Bearer ${TOKEN}")
+    fi
+  fi
+fi
 
-DRAFT_ID=$(echo "$NEW_VERSION" | jq -r '.id')
+DRAFT_ID=$(echo "$NEW_VERSION" | jq -r '.id // empty')
 DRAFT_URL=$(echo "$NEW_VERSION" | jq -r '.links.self // empty')
 FILES_URL=$(echo "$NEW_VERSION" | jq -r '.links.files // empty')
 if [ -z "$FILES_URL" ] || [ "$FILES_URL" = "null" ]; then
   FILES_URL="${DRAFT_URL%/}/files"
 fi
-echo "Draft API: ${DRAFT_URL}"
-echo "Files API: ${FILES_URL}"
 
 if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
-  echo "records/versions failed; trying legacy deposit newversion..." >&2
-  LEGACY=$(curl -fsS -X POST "${ZENODO_API}/deposit/depositions/${ZENODO_RECORD_ID}/actions/newversion" \
-    -H "Authorization: Bearer ${TOKEN}")
-  DRAFT_URL=$(echo "$LEGACY" | jq -r '.links.latest_draft // empty')
-  DRAFT_ID="${DRAFT_URL##*/}"
-  if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
-    echo "Could not create new Zenodo version draft." >&2
-    echo "$LEGACY" | jq . >&2 || true
-    exit 1
-  fi
-  BUCKET=$(curl -fsS "${DRAFT_URL}" -H "Authorization: Bearer ${TOKEN}" | jq -r '.links.bucket')
-  for asset_path in "$PDF_PATH" "$HTML_PATH"; do
-    asset=$(basename "$asset_path")
-    curl -fsS -X PUT "${BUCKET}/${asset}" \
-      -H "Authorization: Bearer ${TOKEN}" \
-      --upload-file "$asset_path"
-    echo "Uploaded ${asset}"
-  done
-  curl -fsS -X PUT "${DRAFT_URL}" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    -H "Content-Type: application/json" \
-    -d "$(jq -n \
-      --arg v "v${VERSION}" \
-      --arg notes "Synaptic Four Technical Report Series. GitHub release: ${RELEASE_TAG}" \
-      '{metadata: {version: $v, notes: $notes}}')"
-else
-  echo "Draft record id: ${DRAFT_ID}"
-  for asset_path in "$PDF_PATH" "$HTML_PATH"; do
+  echo "ERROR: No Zenodo draft available." >&2
+  echo "Open https://zenodo.org/me/uploads — delete any stale SF-TR draft, or set ZENODO_DRAFT_ID." >&2
+  echo "Ensure ZENODO_ACCESS_TOKEN belongs to the same Zenodo account you use in the browser." >&2
+  exit 1
+fi
+
+echo "Draft API: ${DRAFT_URL}"
+echo "Files API: ${FILES_URL}"
+echo "Draft record id: ${DRAFT_ID}"
+
+for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")
     FILES_LIST=$(curl -sS "$FILES_URL" -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{"entries":[]}')
     EXISTING_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
@@ -158,7 +160,6 @@ else
     echo "WARNING: Zenodo metadata update returned HTTP ${META_HTTP} (files are uploaded; edit metadata in UI)." >&2
     cat /tmp/zenodo-meta-response.json >&2 || true
   fi
-fi
 
 echo ""
 echo "Zenodo draft ready: https://zenodo.org/deposit/${DRAFT_ID}"

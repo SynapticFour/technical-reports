@@ -27,6 +27,11 @@ on:
         required: true
         default: '20612210'
         type: string
+      zenodo_draft_id:
+        description: 'Reuse open Zenodo draft id (leave empty to auto-detect)'
+        required: false
+        default: '20625391'
+        type: string
       publish:
         description: 'Auto-publish on Zenodo (mint new version DOI immediately)'
         required: false
@@ -68,6 +73,7 @@ jobs:
             echo "release_tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
             echo "report_id=${{ inputs.report_id }}" >> "$GITHUB_OUTPUT"
             echo "record_id=${{ inputs.zenodo_record_id }}" >> "$GITHUB_OUTPUT"
+            echo "draft_id=${{ inputs.zenodo_draft_id }}" >> "$GITHUB_OUTPUT"
             echo "publish=${{ inputs.publish }}" >> "$GITHUB_OUTPUT"
           else
             TAG="${{ github.event.release.tag_name }}"
@@ -75,6 +81,8 @@ jobs:
             echo "report_id=${TAG%%-v*}" >> "$GITHUB_OUTPUT"
             RECORD_ID="${{ vars.ZENODO_RECORD_ID }}"
             echo "record_id=${RECORD_ID:-20612210}" >> "$GITHUB_OUTPUT"
+            DRAFT_ID="${{ vars.ZENODO_DRAFT_ID }}"
+            echo "draft_id=${DRAFT_ID:-20625391}" >> "$GITHUB_OUTPUT"
             echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -89,6 +97,7 @@ jobs:
         if: steps.token.outputs.configured == 'true'
         env:
           ZENODO_ACCESS_TOKEN: ${{ secrets.ZENODO_ACCESS_TOKEN }}
+          ZENODO_DRAFT_ID: ${{ steps.vars.outputs.draft_id }}
           ZENODO_PUBLISH: ${{ steps.vars.outputs.publish }}
           GH_TOKEN: ${{ github.token }}
         run: |

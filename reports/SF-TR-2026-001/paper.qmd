@@ -96,6 +96,8 @@ format:
     urlcolor: "NavyBlue"
     citecolor: "NavyBlue"
     fig-align: center
+    fig-width: 5.8
+    fig-height: 5.0
     cap-location: bottom
     crossref:
       fig-title: "Figure"
@@ -253,8 +255,8 @@ stack.
 ```{mermaid}
 %%| label: fig-dataplane
 %%| fig-cap: "Ferrum GA4GH Demo data plane — logical flow. Arrows represent the direction of API calls. Numbers correspond to the walk-through in @sec-dataplane-walkthrough."
-%%| fig-width: 7
-%%| fig-height: 6
+%%| fig-width: 5.8
+%%| fig-height: 5.0
 flowchart TB
   subgraph Client["Client"]
     R["demo/run.sh"]
