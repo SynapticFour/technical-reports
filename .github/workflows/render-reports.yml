@@ -77,14 +77,19 @@ jobs:
 
       - name: Install LaTeX packages
         run: |
-          tlmgr update --self --all || true
           tlmgr install booktabs longtable fancyhdr caption multirow enumitem \
             graphicx adjustbox float placeins tabularx microtype wrapfig xcolor \
             lastpage fancyhdr array || true
 
-      - name: Render report
+      - name: Render PDF
         working-directory: reports/${{ matrix.report }}
-        run: quarto render paper.qmd --log-level info
+        timeout-minutes: 10
+        run: quarto render paper.qmd --to pdf --log-level info
+
+      - name: Render HTML
+        working-directory: reports/${{ matrix.report }}
+        timeout-minutes: 10
+        run: quarto render paper.qmd --to html --log-level info
 
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v4
