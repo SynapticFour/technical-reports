@@ -122,7 +122,7 @@ else
     HTTP=$(curl -sS -o /tmp/zenodo-file-post.json -w '%{http_code}' -X POST "${FILES_URL}" \
       -H "Authorization: Bearer ${TOKEN}" \
       -H "Content-Type: application/json" \
-      -d "$(jq -n --arg fn "$asset" '{key: $fn}')")
+      -d "$(jq -n --arg fn "$asset" '[{key: $fn}]')")
     if [ "$HTTP" -ge 400 ]; then
       echo "ERROR: Zenodo file register failed HTTP ${HTTP} for ${asset}" >&2
       cat /tmp/zenodo-file-post.json >&2 || true
