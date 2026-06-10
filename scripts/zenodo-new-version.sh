@@ -6,11 +6,11 @@
 #   export ZENODO_ACCESS_TOKEN=...   # deposit:write, deposit:actions
 #
 # Usage:
-#   ./scripts/zenodo-new-version.sh SF-TR-2026-001 SF-TR-2026-001-v1.0.1 20612210
+#   ./scripts/zenodo-new-version.sh SF-TR-2026-001 SF-TR-2026-001-v1.0.2 20612210
 #
 # Arguments:
 #   1  Report ID (SF-TR-2026-001)
-#   2  GitHub release tag
+#   2  GitHub release tag (must exist with SF-TR-*.pdf and .html assets)
 #   3  Latest Zenodo *version* record id (from URL /records/20612210 → 20612210)
 set -euo pipefail
 
@@ -28,10 +28,47 @@ PAPER="${ROOT}/reports/${REPORT_ID}/paper.qmd"
 VERSION=$(grep -m1 '^version:' "$PAPER" | sed 's/^version: *"\(.*\)"/\1/')
 TITLE=$(grep -m1 '^title:' "$PAPER" | sed 's/^title: *"\(.*\)"/\1/')
 
-echo "Creating Zenodo draft for ${REPORT_ID} ${VERSION} from release ${RELEASE_TAG}..."
-echo "Base record id: ${ZENODO_RECORD_ID}"
+echo "Preparing Zenodo draft for ${REPORT_ID} v${VERSION} from GitHub release ${RELEASE_TAG}..."
 
-# InvenioRDM (current Zenodo): POST /api/records/{id}/versions
+if ! command -v gh >/dev/null 2>&1; then
+  echo "gh CLI required to download release assets" >&2
+  exit 1
+fi
+
+if ! gh release view "${RELEASE_TAG}" --repo "${REPO}" >/dev/null 2>&1; then
+  echo "ERROR: GitHub release '${RELEASE_TAG}' not found on ${REPO}." >&2
+  echo "Create the release with ${REPORT_ID}.pdf and ${REPORT_ID}.html assets first, then re-run." >&2
+  echo "Available releases:" >&2
+  gh release list --repo "${REPO}" --limit 5 >&2 || true
+  exit 1
+fi
+
+download_release_asset() {
+  local asset="$1"
+  local dest="/tmp/${asset}"
+  rm -f "$dest"
+  if gh release download "${RELEASE_TAG}" --repo "${REPO}" --pattern "${asset}" --dir /tmp --clobber 2>/dev/null \
+    && [ -f "$dest" ]; then
+    echo "$dest"
+    return 0
+  fi
+  local url="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/${asset}"
+  if curl -fsSL -o "$dest" "$url"; then
+    echo "$dest"
+    return 0
+  fi
+  echo "ERROR: Could not download ${asset} from release ${RELEASE_TAG}" >&2
+  exit 1
+}
+
+PDF_PATH=$(download_release_asset "${REPORT_ID}.pdf")
+HTML_PATH=$(download_release_asset "${REPORT_ID}.html")
+echo "Downloaded release assets:"
+echo "  ${PDF_PATH} ($(wc -c < "$PDF_PATH") bytes)"
+echo "  ${HTML_PATH} ($(wc -c < "$HTML_PATH") bytes)"
+
+echo "Creating Zenodo version draft from record ${ZENODO_RECORD_ID}..."
+
 NEW_VERSION=$(curl -fsS -X POST "${ZENODO_API}/records/${ZENODO_RECORD_ID}/versions" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json")
@@ -51,16 +88,13 @@ if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
     echo "$LEGACY" | jq . >&2 || true
     exit 1
   fi
-  # Legacy upload path
   BUCKET=$(curl -fsS "${DRAFT_URL}" -H "Authorization: Bearer ${TOKEN}" | jq -r '.links.bucket')
-  for asset in "${REPORT_ID}.pdf" "${REPORT_ID}.html"; do
-    TMP="/tmp/${asset}"
-    gh release download "${RELEASE_TAG}" --repo "${REPO}" --pattern "${asset}" --dir /tmp --clobber
+  for asset_path in "$PDF_PATH" "$HTML_PATH"; do
+    asset=$(basename "$asset_path")
     curl -fsS -X PUT "${BUCKET}/${asset}" \
       -H "Authorization: Bearer ${TOKEN}" \
-      --upload-file "$TMP"
+      --upload-file "$asset_path"
     echo "Uploaded ${asset}"
-    rm -f "$TMP"
   done
   curl -fsS -X PUT "${DRAFT_URL}" \
     -H "Authorization: Bearer ${TOKEN}" \
@@ -71,20 +105,18 @@ if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
       '{metadata: {version: $v, notes: $notes}}')"
 else
   echo "Draft record id: ${DRAFT_ID}"
-  for asset in "${REPORT_ID}.pdf" "${REPORT_ID}.html"; do
-    TMP="/tmp/${asset}"
-    gh release download "${RELEASE_TAG}" --repo "${REPO}" --pattern "${asset}" --dir /tmp --clobber
+  for asset_path in "$PDF_PATH" "$HTML_PATH"; do
+    asset=$(basename "$asset_path")
     curl -fsS -X POST "${FILES_URL}" \
       -H "Authorization: Bearer ${TOKEN}" \
       -H "Content-Type: application/json" \
       -d "$(jq -n --arg fn "$asset" '{key: $fn}')"
     UPLOAD_URL=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
       -H "Authorization: Bearer ${TOKEN}" | jq -r --arg fn "$asset" '.entries[] | select(.key==$fn) | .links.self')
-    curl -fsS -X PUT "$UPLOAD_URL/content" \
+    curl -fsS -X PUT "${UPLOAD_URL}/content" \
       -H "Authorization: Bearer ${TOKEN}" \
-      --upload-file "$TMP"
+      --upload-file "$asset_path"
     echo "Uploaded ${asset}"
-    rm -f "$TMP"
   done
   curl -fsS -X PUT "${DRAFT_URL}" \
     -H "Authorization: Bearer ${TOKEN}" \
