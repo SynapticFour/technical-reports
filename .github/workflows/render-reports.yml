@@ -72,12 +72,6 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Install Chrome Headless Shell for Mermaid PDF
-        run: |
-          quarto uninstall chromium || true
-          quarto install chrome-headless-shell
-          quarto check install
-
       - name: Set up TinyTeX
         uses: r-lib/actions/setup-tinytex@v2
 
