@@ -48,14 +48,21 @@ fi
 echo "Updating metadata on draft ${DRAFT_ID}..."
 echo "${PAYLOAD}" | jq '.metadata | {title, publication_date, resource_type, creators: [.creators[]?.person_or_org.name]}'
 
-META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_EDIT_URL}" \
-  -H "Authorization: Bearer ${TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "${PAYLOAD}")
+for method in PUT PATCH; do
+  META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X "${method}" "${DRAFT_EDIT_URL}" \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${PAYLOAD}")
+  if [ "$META_HTTP" -lt 400 ]; then
+    break
+  fi
+  echo "${method} ${DRAFT_EDIT_URL} → HTTP ${META_HTTP}" >&2
+  cat /tmp/zenodo-meta-response.json >&2 || true
+done
 
 if [ "$META_HTTP" -ge 400 ]; then
-  echo "ERROR: Zenodo metadata update returned HTTP ${META_HTTP}" >&2
-  cat /tmp/zenodo-meta-response.json >&2 || true
+  echo "ERROR: Zenodo metadata update failed (last HTTP ${META_HTTP})." >&2
+  echo "If this draft is corrupted, delete it at https://zenodo.org/me/uploads and re-run the upload workflow." >&2
   exit 1
 fi
 

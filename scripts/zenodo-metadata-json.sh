@@ -93,8 +93,7 @@ jq -n \
               person_or_org: {
                 name: "Synaptic Four",
                 type: "organizational"
-              },
-              affiliations: [{name: "Synaptic Four"}]
+              }
             }
           ],
           keywords: (
