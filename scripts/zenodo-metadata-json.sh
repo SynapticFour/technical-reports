@@ -71,6 +71,8 @@ jq -n \
   --arg desc "${ABSTRACT}" \
   --arg notes "${NOTES}" \
   --arg version "v${VERSION}" \
+  --arg version_plain "${VERSION}" \
+  --arg publisher "Synaptic Four" \
   --arg report "${REPORT_ID}" \
   --argjson parent "${PARENT_META}" \
   --argjson paper_keywords "${KEYWORDS_JSON}" \
@@ -82,6 +84,8 @@ jq -n \
           title: $title,
           publication_date: $pubdate,
           description: $desc,
+          version: $version_plain,
+          publisher: $publisher,
           notes: ($notes + " Report version " + $version + "."),
           access_right: ($p.access_right // "open"),
           creators: (
