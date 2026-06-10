@@ -76,6 +76,11 @@ NEW_VERSION=$(curl -fsS -X POST "${ZENODO_API}/records/${ZENODO_RECORD_ID}/versi
 DRAFT_ID=$(echo "$NEW_VERSION" | jq -r '.id')
 DRAFT_URL=$(echo "$NEW_VERSION" | jq -r '.links.self // empty')
 FILES_URL=$(echo "$NEW_VERSION" | jq -r '.links.files // empty')
+if [ -z "$FILES_URL" ] || [ "$FILES_URL" = "null" ]; then
+  FILES_URL="${DRAFT_URL%/}/files"
+fi
+echo "Draft API: ${DRAFT_URL}"
+echo "Files API: ${FILES_URL}"
 
 if [ -z "$DRAFT_ID" ] || [ "$DRAFT_ID" = "null" ]; then
   echo "records/versions failed; trying legacy deposit newversion..." >&2
@@ -107,8 +112,7 @@ else
   echo "Draft record id: ${DRAFT_ID}"
   for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")
-    FILES_LIST=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
-      -H "Authorization: Bearer ${TOKEN}")
+    FILES_LIST=$(curl -sS "$FILES_URL" -H "Authorization: Bearer ${TOKEN}" 2>/dev/null || echo '{"entries":[]}')
     EXISTING_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
       '.entries[]? | select(.key==$fn) | .links.self // empty' | head -1)
     if [ -n "$EXISTING_URL" ] && [ "$EXISTING_URL" != "null" ]; then
@@ -124,8 +128,7 @@ else
       cat /tmp/zenodo-file-post.json >&2 || true
       exit 1
     fi
-    FILES_LIST=$(curl -fsS "${ZENODO_API}/records/${DRAFT_ID}/files" \
-      -H "Authorization: Bearer ${TOKEN}")
+    FILES_LIST=$(curl -sS "$FILES_URL" -H "Authorization: Bearer ${TOKEN}")
     UPLOAD_URL=$(echo "$FILES_LIST" | jq -r --arg fn "$asset" \
       '.entries[] | select(.key==$fn) | .links.content // .links.self')
     if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
