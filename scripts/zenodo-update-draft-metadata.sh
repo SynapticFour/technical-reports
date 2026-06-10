@@ -17,21 +17,22 @@ TOKEN="${ZENODO_ACCESS_TOKEN:?Set ZENODO_ACCESS_TOKEN}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PAYLOAD=$("${ROOT}/scripts/zenodo-metadata-json.sh" "${REPORT_ID}" "${PARENT_RECORD_ID}" "${RELEASE_TAG}")
 
-DRAFT_URL=""
+DRAFT_EDIT_URL="${ZENODO_API}/records/${DRAFT_ID}/draft"
+DRAFT_FOUND=false
 for url in \
-  "${ZENODO_API}/records/${DRAFT_ID}/draft" \
+  "${DRAFT_EDIT_URL}" \
   "${ZENODO_API}/records/${DRAFT_ID}" \
   "${ZENODO_API}/deposit/depositions/${DRAFT_ID}"; do
   HTTP=$(curl -sS -o /tmp/zenodo-draft-check.json -w '%{http_code}' \
     "$url" -H "Authorization: Bearer ${TOKEN}")
   if [ "$HTTP" -lt 400 ]; then
-    DRAFT_URL="$url"
+    DRAFT_FOUND=true
     break
   fi
   echo "GET ${url} → HTTP ${HTTP}" >&2
 done
 
-if [ -z "${DRAFT_URL}" ]; then
+if [ "$DRAFT_FOUND" = false ]; then
   echo "ERROR: Could not resolve draft ${DRAFT_ID} (published or deleted?)." >&2
   echo "Open drafts for this token:" >&2
   curl -sS "${ZENODO_API}/user/deposits?q=status:draft&size=10&sort=mostrecent" \
@@ -45,9 +46,9 @@ if [ -z "${DRAFT_URL}" ]; then
 fi
 
 echo "Updating metadata on draft ${DRAFT_ID}..."
-echo "${PAYLOAD}" | jq '.metadata | {title, publication_date, resource_type, creators: [.creators[]?.name]}'
+echo "${PAYLOAD}" | jq '.metadata | {title, publication_date, resource_type, creators: [.creators[]?.person_or_org.name]}'
 
-META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_URL}" \
+META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_EDIT_URL}" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d "${PAYLOAD}")

@@ -145,28 +145,26 @@ echo "Files API: ${FILES_URL}"
 echo "Draft record id: ${DRAFT_ID}"
 
 METADATA_JSON=$("${ROOT}/scripts/zenodo-metadata-json.sh" "${REPORT_ID}" "${ZENODO_RECORD_ID}" "${RELEASE_TAG}")
-echo "Updating Zenodo metadata (title, resource type, creators, publication date, description)..."
-META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_URL}" \
+DRAFT_EDIT_URL="${ZENODO_API}/records/${DRAFT_ID}/draft"
+echo "Updating Zenodo metadata via ${DRAFT_EDIT_URL} ..."
+META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_EDIT_URL}" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d "${METADATA_JSON}")
 if [ "$META_HTTP" -ge 400 ]; then
-  echo "WARNING: Zenodo metadata update returned HTTP ${META_HTTP}" >&2
+  echo "ERROR: Zenodo metadata update failed HTTP ${META_HTTP}" >&2
   cat /tmp/zenodo-meta-response.json >&2 || true
-  echo "Retrying via /draft endpoint..." >&2
-  DRAFT_EDIT_URL="${ZENODO_API}/records/${DRAFT_ID}/draft"
-  META_HTTP=$(curl -sS -o /tmp/zenodo-meta-response.json -w '%{http_code}' -X PUT "${DRAFT_EDIT_URL}" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    -H "Content-Type: application/json" \
-    -d "${METADATA_JSON}")
-  if [ "$META_HTTP" -ge 400 ]; then
-    echo "ERROR: Zenodo metadata update failed HTTP ${META_HTTP}" >&2
-    cat /tmp/zenodo-meta-response.json >&2 || true
-    exit 1
-  fi
+  exit 1
 fi
-echo "Metadata OK."
-cat /tmp/zenodo-meta-response.json | jq '{resource_type: .metadata.resource_type, publication_date: .metadata.publication_date, version: .metadata.version}' 2>/dev/null || true
+RESOURCE_TYPE_ID=$(jq -r '.metadata.resource_type.id // empty' /tmp/zenodo-meta-response.json)
+if [ "$RESOURCE_TYPE_ID" != "publication-report" ]; then
+  echo "ERROR: Zenodo did not persist resource_type.id=publication-report (got: ${RESOURCE_TYPE_ID:-none})" >&2
+  jq '.metadata | {resource_type, publication_date, creators}' /tmp/zenodo-meta-response.json >&2 || true
+  exit 1
+fi
+echo "Metadata OK (resource_type=${RESOURCE_TYPE_ID})."
+jq '{resource_type: .metadata.resource_type, publication_date: .metadata.publication_date, version: .metadata.version, publisher: .metadata.publisher}' \
+  /tmp/zenodo-meta-response.json
 
 for asset_path in "$PDF_PATH" "$HTML_PATH"; do
     asset=$(basename "$asset_path")
