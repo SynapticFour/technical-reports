@@ -181,12 +181,13 @@ if [ "$META_HTTP" -ge 400 ]; then
   exit 1
 fi
 RESOURCE_TYPE_ID=$(jq -r '.metadata.resource_type.id // empty' /tmp/zenodo-meta-response.json)
-if [ "$RESOURCE_TYPE_ID" != "publication-report" ]; then
-  echo "ERROR: Zenodo did not persist resource_type.id=publication-report (got: ${RESOURCE_TYPE_ID:-none})" >&2
+RESOURCE_SUBTYPE=$(jq -r '.metadata.resource_type.subtype // empty' /tmp/zenodo-meta-response.json)
+if [ "$RESOURCE_TYPE_ID" != "publication-report" ] && [ "$RESOURCE_SUBTYPE" != "report" ]; then
+  echo "ERROR: Zenodo did not persist a report resource type (id=${RESOURCE_TYPE_ID:-none}, subtype=${RESOURCE_SUBTYPE:-none})" >&2
   jq '.metadata | {resource_type, publication_date, creators}' /tmp/zenodo-meta-response.json >&2 || true
   exit 1
 fi
-echo "Metadata OK (resource_type=${RESOURCE_TYPE_ID})."
+echo "Metadata OK (resource_type report confirmed)."
 jq '{resource_type: .metadata.resource_type, publication_date: .metadata.publication_date, version: .metadata.version, publisher: .metadata.publisher}' \
   /tmp/zenodo-meta-response.json
 
