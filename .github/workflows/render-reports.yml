@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'reports/**'
+      - 'scripts/render-mermaid-figures.sh'
       - 'csl/**'
       - 'styles/**'
       - '_quarto.yml'
@@ -13,6 +14,7 @@ on:
     branches: [main]
     paths:
       - 'reports/**'
+      - 'scripts/render-mermaid-figures.sh'
       - 'csl/**'
       - 'styles/**'
       - '_quarto.yml'
@@ -71,6 +73,14 @@ jobs:
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Render Mermaid figures
+        run: ./scripts/render-mermaid-figures.sh "${{ matrix.report }}"
 
       - name: Set up TinyTeX
         uses: r-lib/actions/setup-tinytex@v2

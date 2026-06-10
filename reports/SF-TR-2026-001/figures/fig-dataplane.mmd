@@ -1,0 +1,45 @@
+%% Ferrum GA4GH Demo data plane — source for fig-dataplane (see scripts/render-mermaid-figures.sh)
+flowchart TB
+  subgraph Client["Client"]
+    R["demo/run.sh"]
+  end
+
+  subgraph FerrumStack["Ferrum (Docker Compose)"]
+    direction TB
+    G["ferrum-gateway\n(Rust · async)"]
+
+    subgraph Services["GA4GH Services"]
+      direction LR
+      DRS["DRS\n/ingest · /objects · /stream"]
+      TRS["TRS\n/tools"]
+      WES["WES\n/runs"]
+      TES["TES\n/tasks"]
+    end
+
+    subgraph Storage["Storage"]
+      direction LR
+      PG[("PostgreSQL\nmetadata")]
+      S3[("MinIO\nobject store")]
+    end
+  end
+
+  subgraph Exec["TES Execution"]
+    direction LR
+    C["Cromwell · Nextflow\nCWL · Snakemake"]
+    GK["GATK container\n(docker.sock)"]
+  end
+
+  R -->|"① multipart ingest"| G
+  G --> DRS
+  G --> TRS
+  G --> WES
+  G --> TES
+
+  R -->|"② Dockstore TRS lookup"| TRS
+  R -->|"③ POST /runs"| WES
+  WES -->|"④ POST /tasks"| TES
+  TES -->|"⑤ Docker API"| C
+  C -->|"⑥ docker.sock"| GK
+
+  DRS --- PG
+  DRS --- S3
