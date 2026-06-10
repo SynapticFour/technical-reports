@@ -252,6 +252,25 @@ footprint.
 @fig-dataplane illustrates the logical data-plane flow in the Ferrum GA4GH Demo
 stack.
 
+::: {.content-visible when-format="pdf"}
+
+| Step | Component | Action |
+|:---|:---|:---|
+| 1 | Client (`demo/run.sh`) → ferrum-gateway | Multipart ingest to DRS |
+| 2 | ferrum-gateway | Routes requests to enabled GA4GH services |
+| 3 | DRS | Ingest, `/objects`, `/stream`; PostgreSQL metadata + MinIO storage |
+| 4 | Client → TRS | Dockstore tool descriptor lookup |
+| 5 | Client → WES | `POST /runs` workflow submission |
+| 6 | WES → TES | Task dispatch to Cromwell / Nextflow / CWL / Snakemake |
+| 7 | TES → execution | Docker API; GATK container via `docker.sock` |
+| 8 | DRS `/stream` | Byte delivery (optional Crypt4GH re-wrap per requester) |
+
+: Ferrum GA4GH Demo data plane — logical flow. Numbers correspond to the walk-through in @sec-dataplane-walkthrough. {#fig-dataplane}
+
+:::
+
+::: {.content-visible when-format="html"}
+
 ```{mermaid}
 %%| label: fig-dataplane
 %%| fig-cap: "Ferrum GA4GH Demo data plane — logical flow. Arrows represent the direction of API calls. Numbers correspond to the walk-through in @sec-dataplane-walkthrough."
@@ -302,6 +321,8 @@ flowchart TB
   DRS --- PG
   DRS --- S3
 ```
+
+:::
 
 ## Gateway and Service Composition
 
@@ -548,7 +569,7 @@ Nextflow, and GATK.
 | 1.0.0 | 2026-06-09 | Initial release; migrated from Ferrum white paper web content |
 | 1.0.1 | 2026-06-09 | PDF layout fixes; inline citations; PDF-safe architecture figure |
 | 1.0.2 | 2026-06-10 | Expanded report content and bibliography (GitHub release only) |
-| 1.0.3 | 2026-06-10 | Architecture diagram scaled to A4 margins; Mermaid figure sizing fix |
+| 1.0.3 | 2026-06-10 | PDF-safe architecture table; HTML Mermaid diagram; crossref fixes |
 
 : Document change log. {#tbl-changelog}
 

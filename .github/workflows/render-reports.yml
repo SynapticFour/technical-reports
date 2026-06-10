@@ -62,6 +62,7 @@ jobs:
     needs: discover
     if: needs.discover.outputs.matrix != '{"report":[]}'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
@@ -70,6 +71,12 @@ jobs:
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install Chrome Headless Shell for Mermaid PDF
+        run: |
+          quarto uninstall chromium || true
+          quarto install chrome-headless-shell
+          quarto check install
 
       - name: Set up TinyTeX
         uses: r-lib/actions/setup-tinytex@v2
@@ -83,7 +90,7 @@ jobs:
 
       - name: Render report
         working-directory: reports/${{ matrix.report }}
-        run: quarto render paper.qmd
+        run: quarto render paper.qmd --log-level info
 
       - name: Upload HTML artifact
         uses: actions/upload-artifact@v4
