@@ -15,9 +15,9 @@ Always prefer the **version DOI** when available. Include the SF-TR identifier f
   institution  = {Synaptic Four},
   number       = {SF-TR-2026-001},
   year         = {2026},
-  version      = {1.0.0},
+  version      = {1.0.3},
   type         = {Technical Report},
-  doi          = {10.5281/zenodo.XXXXXXX},
+  doi          = {10.5281/zenodo.20628103},
   url          = {https://synapticfour.com/publications/sf-tr-2026-001},
   note         = {Synaptic Four Technical Report Series}
 }
@@ -25,18 +25,18 @@ Always prefer the **version DOI** when available. Include the SF-TR identifier f
 
 ### APA Style
 
-> Synaptic Four. (2026). *Ferrum Architecture: A GA4GH-Native Genomics Platform* (Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.0). https://doi.org/10.5281/zenodo.XXXXXXX
+> Synaptic Four. (2026). *Ferrum Architecture: A GA4GH-Native Genomics Platform* (Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.3). https://doi.org/10.5281/zenodo.20628103
 
 ### Chicago (Author-Date)
 
-> Synaptic Four. 2026. "Ferrum Architecture: A GA4GH-Native Genomics Platform." Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.0. https://doi.org/10.5281/zenodo.XXXXXXX.
+> Synaptic Four. 2026. "Ferrum Architecture: A GA4GH-Native Genomics Platform." Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.3. https://doi.org/10.5281/zenodo.20628103.
 
 ### Plain text
 
 ```
 Synaptic Four. Ferrum Architecture: A GA4GH-Native Genomics Platform.
-Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.0 (2026).
-https://doi.org/10.5281/zenodo.XXXXXXX
+Synaptic Four Technical Report SF-TR-2026-001, Version 1.0.3 (2026).
+https://doi.org/10.5281/zenodo.20628103
 ```
 
 ## Citing the Report Series (Repository)
@@ -72,20 +72,18 @@ Add a note that the citation refers to a draft without peer archival. Update cit
 
 ## In-Report Cross-References
 
-Reference other SF-TR reports in `references.bib`:
+When one SF-TR report cites another, add the entry to `references.bib` after the cited report is published with a DOI. Illustrative shape:
 
 ```bibtex
-@techreport{synapticfour2026mycelium,
+@techreport{synapticfour2026example,
   author      = {{Synaptic Four}},
-  title       = {Mycelium Architecture: Federated Data Infrastructure},
+  title       = {Example Report Title},
   institution = {Synaptic Four},
-  number      = {SF-TR-2026-002},
+  number      = {SF-TR-YYYY-NNN},
   year        = {2026},
-  doi         = {10.5281/zenodo.YYYYYYY}
+  doi         = {10.5281/zenodo.XXXXXXX}
 }
 ```
-
-Cite in prose: `@synapticfour2026mycelium` or `[@synapticfour2026mycelium]`.
 
 ## Author ORCIDs
 

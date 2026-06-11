@@ -4,6 +4,8 @@ Permanent, citable, technically rigorous publications documenting Synaptic Four'
 
 This repository is the **canonical source** for all Synaptic Four Technical Reports (SF-TR). It is designed for long-term maintenance, version control, automated rendering, DOI archival via Zenodo, and eventual adaptation to conference and journal formats.
 
+**Discovery:** Published reports are listed at [synapticfour.com/publications](https://synapticfour.com/publications). This repository holds source, build tooling, and contributor documentation.
+
 ## Quick Start
 
 ```bash
@@ -65,8 +67,8 @@ See [docs/numbering.md](docs/numbering.md) for allocation rules and versioning c
 | [docs/zenodo-integration.md](docs/zenodo-integration.md) | Zenodo DOI minting and GitHub integration |
 | [docs/citation-guide.md](docs/citation-guide.md) | How to cite reports; BibTeX examples |
 | [docs/publication-categories.md](docs/publication-categories.md) | Report type taxonomy and when to use each |
-| [docs/future-reports.md](docs/future-reports.md) | Planned and candidate future reports |
-| [docs/journal-conference-roadmap.md](docs/journal-conference-roadmap.md) | Evolving reports into formal publications |
+| [docs/future-reports.md](docs/future-reports.md) | Candidate topics (no fixed schedule) |
+| [docs/journal-conference-roadmap.md](docs/journal-conference-roadmap.md) | How reports may evolve into formal publications |
 | [docs/contributing.md](docs/contributing.md) | Contributor guidelines |
 | [publications-index/README.md](publications-index/README.md) | Report catalogue and index format |
 

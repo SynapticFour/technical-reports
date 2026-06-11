@@ -25,3 +25,8 @@ Thumbs.db
 # Temporary
 *.tmp
 *.bak
+
+# Secrets (Zenodo tokens, etc.)
+.env
+.env.*
+!.env.example

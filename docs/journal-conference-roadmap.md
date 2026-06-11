@@ -130,16 +130,6 @@ Low-effort, high-impact channels:
 - Host webinars linked from synapticfour.com with recording archived
 - Reference SF-TR DOI in slides and description
 
-## 2026–2027 Roadmap (Indicative)
-
-| Quarter | SF-TR | Derived output target |
-|---------|-------|----------------------|
-| Q2 2026 | SF-TR-2026-001 Ferrum | GA4GH Plenary presentation |
-| Q3 2026 | SF-TR-2026-002 Mycelium | RSE Conference talk |
-| Q4 2026 | SF-TR-2026-004 Data Connect | BOSC / ISMB workshop |
-| Q1 2027 | SF-TR-2026-005 Secure Access | Journal submission (security informatics) |
-| Q2 2027 | SF-TR-2026-003 DRS Guide | GA4GH implementation webinar |
-
 ## Related Documents
 
 - [future-reports.md](future-reports.md)

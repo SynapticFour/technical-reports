@@ -29,7 +29,7 @@ This is **not** marketing content. Reports prioritise technical accuracy, method
 | Funding agencies | Evidence of deliverables and impact |
 | Standards bodies | Implementation experience feeding standards evolution |
 | Collaborators | Shared vocabulary and technical baseline |
-| Potential customers | Technical depth for informed procurement (not sales material) |
+| Technical evaluators | Depth for informed adoption decisions (not sales material) |
 
 ## Publication Model
 
@@ -74,14 +74,6 @@ Every published report should meet these criteria:
 | synapticfour.com pages | SF-TR is canonical; website is discovery layer |
 | Conference/journal papers | May adapt SF-TR content; SF-TR remains independent archive |
 | Blog posts | Informal; SF-TR is formal and versioned |
-
-## Success Metrics
-
-- Number of reports published per year
-- DOI citations (Crossref, Google Scholar)
-- References in funding reports and collaboration agreements
-- Adoption of documented patterns in partner implementations
-- Conversion of reports to conference/journal publications
 
 ## Related Documents
 

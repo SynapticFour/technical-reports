@@ -21,7 +21,7 @@ flowchart LR
 | 2 | GitHub Actions | **Build** — Generate HTML and PDF |
 | 3 | GitHub Releases | **Distribution** — Versioned artefacts attached to tags |
 | 4 | Zenodo | **Archival** — Persistent DOI for citation |
-| 5 | synapticfour.com | **Discovery** — Human-facing publication hub and landing pages |
+| 5 | synapticfour.com | **Discovery** — Publication hub and report landing pages |
 
 ## Source of Truth Hierarchy
 
@@ -34,82 +34,41 @@ Never treat the website copy as authoritative if it diverges from the tagged sou
 
 ## synapticfour.com Integration
 
-The website publications hub (`synapticfour-website/src/pages/[locale]/publications.astro`) lists entries with:
+The publications hub lives in the `synapticfour-website` repository:
 
-- Title, summary, category badge
-- Link to dedicated publication page
-- PDF download links (EN/DE where applicable)
-- GitHub source link
-- DOI link (when available)
+- Catalogue: `src/data/publicationsCatalog.ts` (mirror of `publications-index/catalog.yaml`)
+- Pages: `src/pages/[locale]/publications/`
+- Copy: `src/i18n/pubSeries-{de,en,fr}.ts`
+
+Each published report should have:
+
+- Entry in `publicationsCatalog.ts` and `catalog.yaml`
+- A landing page (or shared template) under `/publications/sf-tr-YYYY-NNN`
+- Links to GitHub release HTML/PDF, source tree, and Zenodo DOI
 
 ### Adding a New Report
 
-1. **Host rendered outputs** — Copy PDF to `synapticfour-website/public/papers/` or link to GitHub Release assets.
-2. **Add hub entry** — Extend the `entries` array in `publications.astro`.
-3. **Add i18n strings** — Title, summary, badge in `src/i18n/en.ts` (and `de.ts`, French overlays as needed).
-4. **Create publication page** — Dedicated Astro page or generic template driven by `catalog.yaml`.
-5. **Cross-link** — Link from relevant product pages (Ferrum, Mycelium, etc.).
+1. Publish the GitHub Release with rendered HTML and PDF assets.
+2. Mint the Zenodo version DOI and update `catalog.yaml` and report front matter.
+3. Add the report to `publicationsCatalog.ts` in `synapticfour-website`.
+4. Add or generate the locale publication page and i18n strings.
+5. Cross-link from relevant product pages where appropriate.
 
 ### Recommended URL Pattern
 
 ```
-https://synapticfour.com/publications/sf-tr-2026-001
-https://synapticfour.com/en/publications/sf-tr-2026-001
+https://synapticfour.com/de/publications/sf-tr-2026-001/
+https://synapticfour.com/en/publications/sf-tr-2026-001/
 ```
 
 Use lowercase slugs derived from the SF-TR identifier.
-
-## Advantages and Disadvantages
-
-### GitHub as canonical source
-
-| Advantages | Disadvantages |
-|------------|---------------|
-| Full version history | Less approachable for non-technical readers |
-| Pull request review workflow | Requires Git literacy to contribute |
-| Linked to CI rendering | Not a traditional "publisher" in academic sense |
-| Free for open repositories | Dependent on GitHub availability |
-
-### Generated HTML and PDF
-
-| Advantages | Disadvantages |
-|------------|---------------|
-| Consistent formatting via Quarto | PDF build requires LaTeX in CI |
-| Multiple output formats from one source | Complex diagrams may need tuning per format |
-| Reproducible builds | Build time increases with report count |
-
-### synapticfour.com publication pages
-
-| Advantages | Disadvantages |
-|------------|---------------|
-| Brand-consistent presentation | Additional maintenance per report |
-| Localised summaries (EN/DE/FR) | Risk of drift from canonical source |
-| Integration with product narrative | Not independently archived (no DOI) |
-| SEO and discoverability | Requires website deploy for updates |
-
-### Zenodo DOI archive
-
-| Advantages | Disadvantages |
-|------------|---------------|
-| Citable persistent identifier | Metadata curation effort per release |
-| Independent of GitHub | Snapshot may lag if release process is delayed |
-| Recognised by funders and publishers | Version proliferation with frequent patches |
-| Long-term preservation mandate | Less interactive than HTML |
 
 ## Recommended Practices
 
 - Every public report has all four layers: GitHub source, rendered outputs, website page, Zenodo DOI.
 - Website summaries should be **excerpts** of the abstract, not independent prose.
 - Display the SF-TR identifier, version, and DOI prominently on every publication page.
-- Link "View source on GitHub" and "Cite this report" on every page.
-- Migrate existing whitepapers (e.g. Ferrum) into SF-TR format when revised.
-
-## Future Enhancements
-
-- Auto-generate website entries from `publications-index/catalog.yaml`
-- Host HTML reports on `synapticfour.com` via iframe or static import from release assets
-- Add structured data (JSON-LD) with DOI for search engines
-- Syndicate new report announcements via RSS/Atom feed
+- Link "View source on GitHub" and citation guidance on every page.
 
 ## Related Documents
 
