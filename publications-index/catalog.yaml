@@ -58,9 +58,9 @@ reports:
       - offline-first
       - ferrum-meta
       - HelixTest
-    doi: ""
-    zenodo: ""
-    github_release: "https://github.com/SynapticFour/technical-reports/tree/main/reports/SF-TR-2026-002"
+    doi: "10.5281/zenodo.20812669"
+    zenodo: "https://zenodo.org/records/20812669"
+    github_release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-002-v1.0.0"
     website: "https://synapticfour.com/en/publications/sf-tr-2026-002"
     path: reports/SF-TR-2026-002
     formats:

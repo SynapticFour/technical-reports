@@ -3,8 +3,9 @@ title: "Ferrum Field & Edge: Offline-First GA4GH Nodes for Resource-Constrained 
 authors:
   - name: Synaptic Four
     affiliation: Synaptic Four
-message: "If you use this work, please cite using the DOI once assigned."
+message: "If you use this work, please cite using the DOI."
 type: report
+doi: 10.5281/zenodo.20812669
 keywords:
   - GA4GH
   - genomics

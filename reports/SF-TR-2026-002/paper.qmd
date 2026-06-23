@@ -45,13 +45,14 @@ abstract: |
 
 license: "CC BY 4.0"
 
-doi: ""
-zenodo: ""
-github-release: "https://github.com/SynapticFour/Ferrum/releases"
+doi: "10.5281/zenodo.20812669"
+zenodo: "https://zenodo.org/records/20812669"
+github-release: "https://github.com/SynapticFour/technical-reports/releases/tag/SF-TR-2026-002-v1.0.0"
 
 citation:
   type: report
   publisher: Synaptic Four
+  doi: "10.5281/zenodo.20812669"
   url: "https://synapticfour.com/publications/sf-tr-2026-002"
   issued: 2026-06-23
 
@@ -116,7 +117,7 @@ format:
         \fancyhf{}
         \fancyhead[L]{\small\color{gray}Synaptic Four · SF-TR-2026-002}
         \fancyhead[R]{\small\color{ferrumteal}\textbf{TECHNICAL REPORT}}
-        \fancyfoot[L]{\small\color{gray}CC BY 4.0 · DOI pending Zenodo archival}
+        \fancyfoot[L]{\small\color{gray}DOI: 10.5281/zenodo.20812669 · CC BY 4.0}
         \fancyfoot[R]{\small\color{gray}Page \thepage\ of \pageref{LastPage}}
         \renewcommand{\headrulewidth}{0.4pt}
         \renewcommand{\footrulewidth}{0.4pt}
