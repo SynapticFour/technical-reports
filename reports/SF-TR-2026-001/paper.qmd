@@ -434,8 +434,8 @@ whole-genome production workloads without independent measurement at scale.
 - Upstream gateway patches from the demo overlay (TES backend selection, work
   directory routing).
 - Additional WES engine profiles and HPC scheduler integrations (PBS, OAR).
-- Federation patterns with Mycelium data infrastructure (see planned
-  SF-TR-2026-002).
+- Field and edge deployment patterns (see companion SF-TR-2026-002).
+- Federation patterns with Mycelium data infrastructure (planned future report).
 - Formal security audit for regulated clinical deployment footprints.
 
 # Conclusion

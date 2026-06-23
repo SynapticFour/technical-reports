@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "Ferrum Field & Edge: Offline-First GA4GH Nodes for Resource-Constrained Genomics"
+authors:
+  - name: Synaptic Four
+    affiliation: Synaptic Four
+message: "If you use this work, please cite using the DOI once assigned."
+type: report
+keywords:
+  - GA4GH
+  - genomics
+  - Ferrum
+  - edge computing
+  - offline-first
+  - field deployment
+license: CC-BY-4.0
+repository-code: 'https://github.com/SynapticFour/technical-reports/tree/main/reports/SF-TR-2026-002'
+url: 'https://synapticfour.com/publications/sf-tr-2026-002'
+version: 1.0.0
+date-released: '2026-06-23'

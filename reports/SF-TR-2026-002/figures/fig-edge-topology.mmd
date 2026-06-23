@@ -1,0 +1,39 @@
+%% Ferrum Field & Edge — split topology (source for fig-edge-topology.png)
+flowchart TB
+  subgraph Field["Field node (Edge mode)"]
+    direction TB
+    PI["Raspberry Pi 5 / shared laptop\nferrum-gateway --edge"]
+    SQLITE[("SQLite\nmetadata")]
+    LOCAL[("Local filesystem\nobjects")]
+    META["ferrum-meta bundle\n(offline validate)"]
+    PI --> SQLITE
+    PI --> LOCAL
+    META --> PI
+  end
+
+  subgraph Transport["Intermittent connectivity"]
+    direction LR
+    VSAT["VSAT / mobile tether"]
+    USB["Sneakernet export\nfield-bundle.tar.gz"]
+  end
+
+  subgraph Hub["Connected hub (server mode)"]
+    direction TB
+    GW["ferrum-gateway\n(Postgres + object store)"]
+    INFRA["ga4gh-infra\n(broker · visas · ADS)"]
+    WES["WES / TES\n(workflows)"]
+    GW --> INFRA
+    GW --> WES
+  end
+
+  subgraph Validate["Independent validation"]
+    HT["HelixTest\n--mode ferrum-africa"]
+    DEMO["Ferrum GA4GH Demo\n./run on hub"]
+  end
+
+  PI -->|"ferrum sync push\n(resume · Crypt4GH)"| VSAT
+  PI --> USB
+  VSAT --> GW
+  USB --> GW
+  GW --> HT
+  GW --> DEMO

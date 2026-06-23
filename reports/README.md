@@ -33,4 +33,5 @@ See [publications-index/catalog.yaml](../publications-index/catalog.yaml) for th
 
 | ID | Title | Status | Version |
 |----|-------|--------|---------|
-| [SF-TR-2026-001](SF-TR-2026-001/) | Ferrum Architecture: A GA4GH-Native Genomics Platform | published | 1.0.0 |
+| [SF-TR-2026-001](SF-TR-2026-001/) | Ferrum Architecture: A GA4GH-Native Genomics Platform | published | 1.0.3 |
+| [SF-TR-2026-002](SF-TR-2026-002/) | Ferrum Field & Edge: Offline-First GA4GH Nodes | published | 1.0.0 |

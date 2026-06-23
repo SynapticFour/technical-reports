@@ -36,3 +36,34 @@ reports:
     formats:
       html: true
       pdf: true
+
+  - id: SF-TR-2026-002
+    title: "Ferrum Field & Edge: Offline-First GA4GH Nodes for Resource-Constrained Genomics"
+    category: architecture
+    status: published
+    version: "1.0.0"
+    date: "2026-06-23"
+    authors:
+      - Synaptic Four
+    abstract: >
+      Documents Ferrum Field & Edge: embedded GA4GH runtime on SQLite and local storage,
+      offline ferrum-meta validation, bandwidth-adaptive sync to connected hubs, long-offline
+      authentication, residency audit chains, and pathogen surveillance workflows. Companion
+      to SF-TR-2026-001.
+    keywords:
+      - GA4GH
+      - genomics
+      - Ferrum
+      - edge computing
+      - offline-first
+      - ferrum-meta
+      - HelixTest
+    doi: ""
+    zenodo: ""
+    github_release: "https://github.com/SynapticFour/technical-reports/tree/main/reports/SF-TR-2026-002"
+    website: "https://synapticfour.com/en/publications/sf-tr-2026-002"
+    path: reports/SF-TR-2026-002
+    formats:
+      html: true
+      pdf: true
+    companion_of: SF-TR-2026-001

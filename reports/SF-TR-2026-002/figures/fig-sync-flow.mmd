@@ -1,0 +1,11 @@
+%% Field sync queue lifecycle (source for fig-sync-flow.png)
+flowchart LR
+  A["ONT / file ingest\n(DRS object + metadata_ref)"] --> B["sync_queue\npending"]
+  B --> C{"DUO / consent\npolicy OK?"}
+  C -->|no| D["skipped\n(warn operator)"]
+  C -->|yes| E["sync push\nin_progress"]
+  E --> F{"Hub response"}
+  F -->|200 / 201| G["completed\nresidency audit"]
+  F -->|409 conflict| H["failed\n(operator review)"]
+  F -->|transient error| I["retry with\nresume_token"]
+  I --> E
