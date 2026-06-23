@@ -68,14 +68,41 @@ echo "Downloaded release assets:"
 echo "  ${PDF_PATH} ($(wc -c < "$PDF_PATH") bytes)"
 echo "  ${HTML_PATH} ($(wc -c < "$HTML_PATH") bytes)"
 
-METADATA_JSON=$("${ROOT}/scripts/zenodo-metadata-json.sh" "${REPORT_ID}" "" "${RELEASE_TAG}")
+METADATA_JSON=$(jq -n \
+  --arg title "$(grep -m1 '^title:' "$ROOT/reports/${REPORT_ID}/paper.qmd" | sed 's/^title: *"\(.*\)"/\1/') (${REPORT_ID})" \
+  --arg desc "$(awk '/^abstract: \|/{flag=1;next} /^[a-z]/ && !/^  /{if(flag) exit} flag{print}' "$ROOT/reports/${REPORT_ID}/paper.qmd" | sed '/^$/d' | head -c 8000)" \
+  --arg pubdate "$(grep -m1 '^date:' "$ROOT/reports/${REPORT_ID}/paper.qmd" | sed 's/^date: *"\(.*\)"/\1/')" \
+  --arg version "$(grep -m1 '^version:' "$ROOT/reports/${REPORT_ID}/paper.qmd" | sed 's/^version: *"\(.*\)"/\1/')" \
+  --arg tag "$REPORT_ID" \
+  --arg notes "Synaptic Four Technical Report Series. GitHub release: ${RELEASE_TAG}" \
+  '{
+    metadata: {
+      title: $title,
+      upload_type: "publication",
+      publication_type: "report",
+      publication_date: $pubdate,
+      description: $desc,
+      version: $version,
+      publisher: "Synaptic Four",
+      creators: [{name: "Synaptic Four", affiliation: "Synaptic Four"}],
+      keywords: [$tag, "technical report", "GA4GH", "genomics", "Ferrum", "edge computing"],
+      license: "cc-by-4.0",
+      notes: $notes
+    }
+  }')
 
 echo "Creating new Zenodo deposition for ${REPORT_ID} (${RELEASE_TAG})..."
 
-DEPOSITION=$(curl -fsS -X POST "${ZENODO_API}/deposit/depositions" \
+HTTP=$(curl -sS -o /tmp/zenodo-dep.json -w '%{http_code}' -X POST "${ZENODO_API}/deposit/depositions" \
   -H "Authorization: Bearer ${TOKEN}" \
   -H "Content-Type: application/json" \
   -d "${METADATA_JSON}")
+if [ "$HTTP" -ge 400 ]; then
+  echo "ERROR: Zenodo deposition create failed HTTP ${HTTP}" >&2
+  cat /tmp/zenodo-dep.json >&2 || true
+  exit 1
+fi
+DEPOSITION=$(cat /tmp/zenodo-dep.json)
 
 DEP_ID=$(echo "$DEPOSITION" | jq -r '.id')
 BUCKET=$(echo "$DEPOSITION" | jq -r '.links.bucket // empty')
