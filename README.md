@@ -1,6 +1,6 @@
 # Synaptic Four Technical Report Series
 
-Freeze status (2026-09): [STATUS.md](STATUS.md).
+Status: [STATUS.md](STATUS.md).
 
 
 Permanent, citable, technically rigorous publications documenting Synaptic Four's software, infrastructure, and reference implementations in bioinformatics, federated data systems, FAIR data, genomics, multi-omics, GA4GH standards, and privacy-preserving research platforms.
