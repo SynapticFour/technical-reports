@@ -1,8 +1,5 @@
 # Synaptic Four Technical Report Series
 
-Status: [STATUS.md](STATUS.md).
-
-
 Permanent, citable, technically rigorous publications documenting Synaptic Four's software, infrastructure, and reference implementations in bioinformatics, federated data systems, FAIR data, genomics, multi-omics, GA4GH standards, and privacy-preserving research platforms.
 
 This repository is the **canonical source** for all Synaptic Four Technical Reports (SF-TR). It is designed for long-term maintenance, version control, automated rendering, DOI archival via Zenodo, and eventual adaptation to conference and journal formats.
