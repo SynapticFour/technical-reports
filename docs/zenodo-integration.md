@@ -52,9 +52,9 @@ Until that toggle is enabled, releases will not create Zenodo drafts.
 
 Store your Zenodo token as a **repository secret** (not in code):
 
-1. Create a token: [zenodo.org/account/settings/applications/tokens/new](https://zenodo.org/account/settings/applications/tokens/new/)  
+1. Create a token: [zenodo.org/account/settings/applications/tokens/new](https://zenodo.org/account/settings/applications/tokens/new/)
    Scopes: **`deposit:write`**, **`deposit:actions`**
-2. GitHub → `technical-reports` → **Settings → Secrets and variables → Actions → New repository secret**  
+2. GitHub → `technical-reports` → **Settings → Secrets and variables → Actions → New repository secret**
    Name: `ZENODO_ACCESS_TOKEN`
 3. Optional variable: `ZENODO_RECORD_ID` = `20612210` (latest published version record)
 
