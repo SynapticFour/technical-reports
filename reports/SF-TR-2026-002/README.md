@@ -1,6 +1,10 @@
 # SF-TR-2026-002 — Ferrum Field & Edge
 
-Companion to [SF-TR-2026-001](../SF-TR-2026-001/) (server-centre Ferrum architecture).
+Companion to [SF-TR-2026-001](../SF-TR-2026-001/) (server-centre Ferrum architecture). Version 1.0.0 in this directory's front matter and in the catalogue.
+
+Website page: [https://synapticfour.com/en/publications/sf-tr-2026-002/](https://synapticfour.com/en/publications/sf-tr-2026-002/)
+
+The same page exists in German (`/de/publications/sf-tr-2026-002/`) and in French (`/fr/publications/sf-tr-2026-002/`).
 
 ## Render locally
 

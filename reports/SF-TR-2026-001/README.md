@@ -1,29 +1,22 @@
-# SF-TR Report Template
+# SF-TR-2026-001 — Ferrum Architecture
 
-Copy this directory to `reports/SF-TR-YYYY-NNN/` when starting a new technical report.
+Ferrum Architecture: A GA4GH-Native Genomics Platform. Version 1.0.3 in this directory's front matter and in the catalogue.
+
+Companion: [SF-TR-2026-002](../SF-TR-2026-002/).
+
+Website page: [https://synapticfour.com/en/publications/sf-tr-2026-001/](https://synapticfour.com/en/publications/sf-tr-2026-001/)
+
+The same page exists in German (`/de/publications/sf-tr-2026-001/`) and in French (`/fr/publications/sf-tr-2026-001/`).
+
+## Render locally
 
 ```bash
-cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
+cd reports/SF-TR-2026-001
+quarto render paper.qmd
 ```
 
-## Checklist
+`quarto render` writes `_output/`. It does not replace `paper.qmd`.
 
-- [ ] Replace `YYYY` and `NNN` in directory name and all front matter fields
-- [ ] Update `title`, `subtitle`, `author`, `abstract`, and `keywords`
-- [ ] Set `report-category` (see [docs/publication-categories.md](../../docs/publication-categories.md))
-- [ ] Register the report in [publications-index/catalog.yaml](../../publications-index/catalog.yaml)
-- [ ] Add report-specific figures to a local `figures/` subdirectory
-- [ ] Populate `references.bib`
-- [ ] Remove or complete placeholder sections
-- [ ] Render locally: `quarto render paper.qmd`
-- [ ] Follow [docs/workflow.md](../../docs/workflow.md) for release and DOI
+## Release
 
-## Local Figures
-
-Place report-specific figures in `reports/SF-TR-YYYY-NNN/figures/`. Reference them in `paper.qmd`:
-
-```markdown
-![Component diagram](figures/architecture.png){#fig-arch width=80%}
-```
-
-Shared figures used across multiple reports may live in the repository-level `figures/` directory.
+The published release is tag `SF-TR-2026-001-v1.0.3`. DOI `10.5281/zenodo.20628103`. Follow [docs/workflow.md](../../docs/workflow.md) for a later revision. Do not copy the report template onto this directory.

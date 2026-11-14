@@ -1,118 +1,91 @@
 # Synaptic Four Technical Report Series
 
-Permanent, citable, technically rigorous publications documenting Synaptic Four's software, infrastructure, and reference implementations in bioinformatics, federated data systems, FAIR data, genomics, multi-omics, GA4GH standards, and privacy-preserving research platforms.
+This repository is the source of the SF-TR series: citable reports on how Synaptic Four software is built, so a later reader can check a report and cite it.
 
-This repository is the **canonical source** for all Synaptic Four Technical Reports (SF-TR). It is designed for long-term maintenance, version control, automated rendering, DOI archival via Zenodo, and eventual adaptation to conference and journal formats.
+For someone reading a published report, and for someone writing the next one.
 
-**Discovery:** Published reports are listed at [synapticfour.com/publications](https://synapticfour.com/publications). This repository holds source, build tooling, and contributor documentation.
+**Status: No public status is recorded.** A report's own version lives in that report's front matter. The claims registry has no stage for this series.
 
-## Quick Start
+Published reports are listed at [https://synapticfour.com/en/publications/](https://synapticfour.com/en/publications/).
+
+## What is in this repository
+
+- [publications-index/catalog.yaml](publications-index/catalog.yaml) — the catalogue
+- [templates/SF-TR-YYYY-NNN-template/](templates/SF-TR-YYYY-NNN-template/) — the scaffold for a new report
+- [reports/SF-TR-2026-001](reports/SF-TR-2026-001/) — Ferrum Architecture, version 1.0.3. Website: [https://synapticfour.com/en/publications/sf-tr-2026-001/](https://synapticfour.com/en/publications/sf-tr-2026-001/)
+- [reports/SF-TR-2026-002](reports/SF-TR-2026-002/) — Ferrum Field & Edge, version 1.0.0. Website: [https://synapticfour.com/en/publications/sf-tr-2026-002/](https://synapticfour.com/en/publications/sf-tr-2026-002/)
+
+## What it does
+
+- Keeps each report's Quarto source, citation file, and catalogue row together.
+- Renders HTML and PDF with Quarto. The rendered files go to `_output/`, which is gitignored.
+- Publishes a version by a GitHub release tag and a Zenodo DOI. The identifier `SF-TR-YYYY-NNN` stays. The version changes.
+
+## Limits
+
+- The internal technical and editorial review is not a journal peer review. [docs/journal-conference-roadmap.md](docs/journal-conference-roadmap.md) says an SF-TR is usually acceptable as a non-peer-reviewed preprint.
+- A report does not certify the software it describes. SF-TR-2026-001 says a HelixTest result is a technical conformance signal, not official GA4GH certification.
+- [docs/future-reports.md](docs/future-reports.md) lists candidate topics. It is not a schedule.
+- Copying the template onto `reports/SF-TR-2026-001` or `reports/SF-TR-2026-002` replaces a published source.
+- GitHub may report this repository's licence as not asserted. The file in the tree is CC BY 4.0. Individual reports may name a different licence in their front matter.
+
+## Render a draft
+
+Prerequisites: [Quarto](https://quarto.org/docs/get-started/) 1.4 or newer. PDF also needs a TeX installation, as [docs/contributing.md](docs/contributing.md) names it.
 
 ```bash
-# Install Quarto: https://quarto.org/docs/get-started/
-quarto --version
-
-# Copy the template for a new report
-cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
-
-# Edit metadata and content in reports/SF-TR-2026-001/paper.qmd
-quarto render reports/SF-TR-2026-001/paper.qmd
-
-# Outputs appear in reports/SF-TR-2026-001/_output/
+cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-YYYY-NNN
+cd reports/SF-TR-YYYY-NNN
+quarto render paper.qmd
 ```
 
-## Repository Layout
-
-```
-technical-reports/
-├── README.md                          # This file
-├── CITATION.cff                       # Repository-level citation metadata
-├── _quarto.yml                        # Quarto project configuration
-├── .github/workflows/                 # CI: render HTML and PDF
-├── templates/
-│   └── SF-TR-YYYY-NNN-template/       # Reusable report scaffold
-├── reports/                           # Published and in-progress reports
-│   └── SF-TR-YYYY-NNN/                # One directory per report
-├── figures/                           # Shared figures (report-specific figures live in each report)
-├── csl/                               # Citation Style Language files
-├── publications-index/                # Machine-readable catalogue of all reports
-└── docs/                              # Process, strategy, and contributor documentation
-```
-
-## Technical Report Identifier
-
-Every report receives a permanent identifier:
-
-```
-SF-TR-YYYY-NNN
-```
-
-| Component | Meaning |
-|-----------|---------|
-| `SF-TR`   | Synaptic Four Technical Report |
-| `YYYY`    | Year of initial publication |
-| `NNN`     | Three-digit sequence within that year (`001`–`999`) |
-
-Examples: `SF-TR-2026-001`, `SF-TR-2026-002`, `SF-TR-2027-001`
-
-See [docs/numbering.md](docs/numbering.md) for allocation rules and versioning conventions.
+Replace `YYYY-NNN` with a new identifier. You should see `_output/` in that new directory. The steps, and how to re-render a published report without replacing `paper.qmd`, are in [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/workflow.md](docs/workflow.md) | End-to-end workflow: writing, releasing, DOI, website, versioning |
-| [docs/publication-strategy.md](docs/publication-strategy.md) | Overall publication philosophy and goals |
-| [docs/website-publishing.md](docs/website-publishing.md) | Canonical workflow for synapticfour.com integration |
-| [docs/zenodo-integration.md](docs/zenodo-integration.md) | Zenodo DOI minting and GitHub integration |
-| [docs/citation-guide.md](docs/citation-guide.md) | How to cite reports; BibTeX examples |
-| [docs/publication-categories.md](docs/publication-categories.md) | Report type taxonomy and when to use each |
-| [docs/future-reports.md](docs/future-reports.md) | Candidate topics (no fixed schedule) |
-| [docs/journal-conference-roadmap.md](docs/journal-conference-roadmap.md) | How reports may evolve into formal publications |
-| [docs/contributing.md](docs/contributing.md) | Contributor guidelines |
-| [publications-index/README.md](publications-index/README.md) | Report catalogue and index format |
+### Tutorial
 
-## Publication Workflow (Summary)
+- [Getting started](docs/GETTING-STARTED.md)
 
-1. **Write** — Author in Quarto/Markdown under `reports/SF-TR-YYYY-NNN/`.
-2. **Review** — Internal technical review; update `publications-index/`.
-3. **Release** — Create a GitHub Release tagged `SF-TR-YYYY-NNN-vX.Y.Z`.
-4. **Archive** — Zenodo mints a versioned DOI from the release (see [docs/zenodo-integration.md](docs/zenodo-integration.md)).
-5. **Publish** — Add HTML/PDF and metadata to [synapticfour.com](https://synapticfour.com) publications hub.
-6. **Maintain** — Issue revised versions with new release tags; prior DOI versions remain archived.
+### How-to guides
 
-## Technology Stack
+- [Workflow](docs/workflow.md) — writing, release, DOI, website, versioning
+- [Website publishing](docs/website-publishing.md)
+- [Zenodo](docs/zenodo-integration.md)
+- [Contributing](docs/contributing.md)
 
-| Tool | Role |
-|------|------|
-| [Quarto](https://quarto.org/) | Authoring and rendering (HTML, PDF) |
-| Markdown | Primary authoring format |
-| BibTeX | Bibliography management |
-| GitHub Actions | Automated rendering on push and release |
-| GitHub Releases | Versioned distribution |
-| [Zenodo](https://zenodo.org/) | Long-term DOI archival |
+### Reference
 
-## Citation
+- [Numbering](docs/numbering.md)
+- [Citation guide](docs/citation-guide.md)
+- [Categories](docs/publication-categories.md)
+- [For evaluators](docs/FOR-EVALUATORS.md)
+- Catalogue: [publications-index/README.md](publications-index/README.md)
 
-To cite this publication series repository:
+### Explanation
 
-```bibtex
-@misc{synapticfour_technical_reports,
-  author       = {{Synaptic Four}},
-  title        = {Synaptic Four Technical Report Series},
-  year         = {2026},
-  publisher    = {GitHub},
-  howpublished = {\url{https://github.com/SynapticFour/technical-reports}},
-  note         = {Technical report repository}
-}
-```
+- [How the series is arranged](docs/ARCHITECTURE.md)
+- [Publication strategy](docs/publication-strategy.md)
+- [Candidate topics](docs/future-reports.md)
+- [Journal and conference roadmap](docs/journal-conference-roadmap.md)
 
-See [CITATION.cff](CITATION.cff) and [docs/citation-guide.md](docs/citation-guide.md) for per-report citation formats.
+The full index is [docs/README.md](docs/README.md).
 
-## License
+## Licence
 
-Report content is licensed individually; see each report's `paper.qmd` front matter. Repository infrastructure defaults to [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) unless otherwise stated.
+Report content is licensed in each report's front matter. Repository infrastructure, templates, and documentation are Creative Commons Attribution 4.0 International: share and adapt them, with attribution. The file is [LICENSE](LICENSE).
 
-## Contact
+## Cite
 
-Questions about the technical report series: [contact@synapticfour.com](mailto:contact@synapticfour.com)
+Use [CITATION.cff](CITATION.cff) for the series. Prefer that file over a hand-copied line. Each report has its own citation file at `reports/SF-TR-YYYY-NNN/CITATION.cff`.
+
+## Website
+
+- Publications: [https://synapticfour.com/en/publications/](https://synapticfour.com/en/publications/)
+- Technical profile: [https://synapticfour.com/en/technical/code/](https://synapticfour.com/en/technical/code/)
+
+The same pages exist in German (`/de/publications/`, `/de/technik/code/`) and in French (`/fr/publications/`, `/fr/technique/code/`).
+
+The map of repositories: [profile/README.md](https://github.com/SynapticFour/.github/blob/main/profile/README.md).
+
+Contact: [contact@synapticfour.com](mailto:contact@synapticfour.com)

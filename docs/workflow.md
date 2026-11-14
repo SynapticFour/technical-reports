@@ -24,8 +24,10 @@ flowchart TD
 3. Copy the template:
 
    ```bash
-   cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
+   cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-YYYY-NNN
    ```
+
+   Replace `YYYY-NNN` with the new identifier. Do not copy the template onto `reports/SF-TR-2026-001` or `reports/SF-TR-2026-002`. Those reports are published. Rendering an existing report with `quarto render` writes `_output/` and does not replace `paper.qmd`. See [GETTING-STARTED.md](GETTING-STARTED.md).
 
 ### Author content
 
@@ -36,7 +38,7 @@ flowchart TD
 - Render locally before opening a pull request:
 
   ```bash
-  cd reports/SF-TR-2026-001
+  cd reports/SF-TR-YYYY-NNN
   quarto render paper.qmd
   ```
 

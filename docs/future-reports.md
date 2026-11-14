@@ -5,7 +5,6 @@ Topics under consideration for the Synaptic Four Technical Report Series. There 
 | Topic | Likely category | Notes |
 |-------|-----------------|-------|
 | Ferrum Field & Edge | Architecture | **SF-TR-2026-002** (published) |
-| Mycelium Architecture | Architecture | |
 | GA4GH Data Connect in Practice | Standards |
 | FAIR-by-Design Genomics Platforms | Architecture |
 | Federated Omics Infrastructure Patterns | Interoperability |
