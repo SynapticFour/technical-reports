@@ -26,9 +26,10 @@ cd technical-reports
 # Verify Quarto
 quarto --version
 
-# Copy template for a new report (after number allocation)
-cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
-cd reports/SF-TR-2026-001
+# Copy template for a new report (after number allocation).
+# Do not copy onto reports/SF-TR-2026-001 or reports/SF-TR-2026-002.
+cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-YYYY-NNN
+cd reports/SF-TR-YYYY-NNN
 quarto render paper.qmd
 ```
 

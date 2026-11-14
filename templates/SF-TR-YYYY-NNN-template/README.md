@@ -3,8 +3,10 @@
 Copy this directory to `reports/SF-TR-YYYY-NNN/` when starting a new technical report.
 
 ```bash
-cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-2026-001
+cp -r templates/SF-TR-YYYY-NNN-template reports/SF-TR-YYYY-NNN
 ```
+
+Replace `YYYY-NNN` with a new identifier. Do not copy this template onto `reports/SF-TR-2026-001` or `reports/SF-TR-2026-002`. Those reports are published. See [docs/GETTING-STARTED.md](../../docs/GETTING-STARTED.md).
 
 ## Checklist
 
