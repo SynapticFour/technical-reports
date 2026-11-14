@@ -45,7 +45,7 @@ render_one() {
     docker run --rm \
       -v "$FIG_DIR:/data" \
       -u "$(id -u):$(id -g)" \
-      minlag/mermaid-cli \
+      minlag/mermaid-cli:11.4.0 \
       -i "/data/$(basename "$mmd")" \
       -o "/data/$(basename "$out")" \
       -w "$WIDTH" -H "$HEIGHT" -b "$BACKGROUND"
