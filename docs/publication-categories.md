@@ -10,7 +10,7 @@ Taxonomy for classifying Synaptic Four Technical Reports. Set the `report-catego
 
 **Typical sections emphasised:** System Architecture, Design trade-offs, Deployment topology.
 
-**Examples:** Ferrum Architecture, Mycelium Architecture, Secure Data Access Architectures.
+**Examples:** Ferrum Architecture, Secure Data Access Architectures.
 
 **Audience:** Data architects, infrastructure teams, senior engineers.
 

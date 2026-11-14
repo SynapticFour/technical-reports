@@ -435,7 +435,6 @@ whole-genome production workloads without independent measurement at scale.
   directory routing).
 - Additional WES engine profiles and HPC scheduler integrations (PBS, OAR).
 - Field and edge deployment patterns (see companion SF-TR-2026-002).
-- Federation patterns with Mycelium data infrastructure (planned future report).
 - Formal security audit for regulated clinical deployment footprints.
 
 # Conclusion

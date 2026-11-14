@@ -244,7 +244,7 @@ device).
 | ferrum-meta [@ferrum_meta2026] | Metadata schema layer | Schema only; Ferrum implements runtime binding |
 
 Ferrum Field deliberately **does not** integrate delay-tolerant mesh transport
-(e.g. Mycelium) in this release. Federated Beacon queries use configurable HTTP
+in this release. Federated Beacon queries use configurable HTTP
 peers (see @sec-federation); mesh messaging remains future work cross-referenced
 from SF-TR-2026-001.
 
@@ -509,8 +509,8 @@ crate. Peers are configured explicitly; queries use `?federate=true` on
 `/ga4gh/beacon/v2/g_variants`. Unreachable peers are non-fatal; local results
 return with `meta.warnings`.
 
-This is distinct from mesh or DTN transport. SF-TR-2026-001 future work noted
-Mycelium integration; that remains outside the scope of this report.
+This is distinct from mesh or DTN transport. Mesh integration remains outside
+the scope of this report.
 
 # Validation Methodology {#sec-validation}
 
@@ -654,8 +654,7 @@ Qualitative observations from development CI (not production load tests):
 - Expanded HelixTest Africa profiles (power, sync resume end-to-end).
 - Deeper ga4gh-infra ADS integration for sync admission on hub.
 - Archive transpiler automation (ferrum-meta → EGA/GHGA submission packages).
-- Delay-tolerant transport research (mesh integration) — see SF-TR-2026-001 and
-  planned Mycelium architecture report.
+- Delay-tolerant transport research (mesh integration) remains outside this report.
 - Field deployment case studies with operator metrics (post-pilot publication).
 
 # Conclusion
